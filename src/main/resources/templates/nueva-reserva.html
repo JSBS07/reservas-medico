@@ -18,26 +18,44 @@
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
         
         <form th:action="@{/reservas/crear}" method="post">
+
             <!-- Datos del paciente -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5>Datos del Paciente</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="nombrePaciente" class="form-label">Nombre Completo *</label>
-                            <input type="text" class="form-control" id="nombrePaciente" 
-                                   name="nombrePaciente" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="emailPaciente" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="emailPaciente" 
-                                   name="emailPaciente" required>
-                        </div>
-                    </div>
-                </div>
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Datos del Paciente</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="nombresPaciente" class="form-label">Nombres *</label>
+                <input type="text" class="form-control" id="nombresPaciente" 
+                       name="nombresPaciente" required>
             </div>
+            <div class="col-md-6">
+                <label for="apellidosPaciente" class="form-label">Apellidos *</label>
+                <input type="text" class="form-control" id="apellidosPaciente" 
+                       name="apellidosPaciente" required>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <label for="emailPaciente" class="form-label">Email *</label>
+                <input type="email" class="form-control" id="emailPaciente" 
+                       name="emailPaciente" required>
+            </div>
+            <div class="col-md-4">
+                <label for="telefonoPaciente" class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" id="telefonoPaciente" 
+                       name="telefonoPaciente" placeholder="+57 300 123 4567">
+            </div>
+            <div class="col-md-4">
+                <label for="fechaNacimientoPaciente" class="form-label">Fecha de Nacimiento *</label>
+                <input type="date" class="form-control" id="fechaNacimientoPaciente" 
+                       name="fechaNacimientoPaciente" required>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- Detalles de la cita -->
             <div class="card mb-3">
@@ -52,9 +70,15 @@
                                 <option value="">Seleccionar doctor...</option>
                                 <option th:each="doctor : ${doctores}" 
                                         th:value="${doctor.id}" 
-                                        th:text="${doctor.nombreCompleto + ' - ' + doctor.especialidad}">
+                                        th:data-telefono="${doctor.telefono}"
+                                        th:text="${doctor.nombreCompleto}">
                                 </option>
                             </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono del Doctor</label>
+                            <input type="text" class="form-control" id="doctorTelefono" 
+                                   readonly placeholder="Seleccione un doctor">
                         </div>
                         <div class="col-md-4">
                             <label for="servicioId" class="form-label">Servicio Médico *</label>
@@ -66,14 +90,14 @@
                                 </option>
                             </select>
                         </div>
+                    </div>
+                    <div class="row mt-3">
                         <div class="col-md-4">
                             <label for="fechaReserva" class="form-label">Fecha *</label>
                             <input type="date" class="form-control" id="fechaReserva" 
                                    name="fechaReserva" required>
                         </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="horaReserva" class="form-label">Hora *</label>
                             <input type="time" class="form-control" id="horaReserva" 
                                    name="horaReserva" required>
@@ -88,8 +112,24 @@
     </div>
 
     <script>
-        // Establecer fecha mínima como hoy
-        document.getElementById('fechaReserva').min = new Date().toISOString().split('T')[0];
-    </script>
+    // Establecer fecha mínima como hoy para la reserva
+    document.getElementById('fechaReserva').min = new Date().toISOString().split('T')[0];
+    
+    // Validar fecha de nacimiento (no puede ser mayor a hoy)
+    document.getElementById('fechaNacimientoPaciente').max = new Date().toISOString().split('T')[0];
+    
+    // Mostrar teléfono del doctor seleccionado
+    document.getElementById('doctorId').addEventListener('change', function() {
+        const doctorSelect = this;
+        const telefonoInput = document.getElementById('doctorTelefono');
+        const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+        
+        if (selectedOption.value && selectedOption.getAttribute('data-telefono')) {
+            telefonoInput.value = selectedOption.getAttribute('data-telefono');
+        } else {
+            telefonoInput.value = "No disponible";
+        }
+    });
+</script>
 </body>
 </html>

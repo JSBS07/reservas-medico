@@ -20,38 +20,41 @@
             <a href="/" class="btn btn-secondary">Inicio</a>
         </div>
 
-        <div class="table-responsive">
+        <div th:if="${reservas.empty}" class="alert alert-info">
+            No hay reservas registradas.
+        </div>
+
+        <div th:unless="${reservas.empty}" class="table-responsive">
             <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Paciente</th>
-                        <th>Doctor</th>
-                        <th>Servicio</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="reserva : ${reservas}">
-                        <td th:text="${reserva.id}"></td>
-                        <td th:text="${reserva.paciente.nombreCompleto}"></td>
-                        <td th:text="${reserva.doctor.nombreCompleto}"></td>
-                        <td th:text="${reserva.servicio.nombreServicio}"></td>
-                        <td th:text="${reserva.fechaReserva}"></td>
-                        <td th:text="${reserva.horaReserva}"></td>
-                        <td>
-                            <span class="badge" 
-                                  th:classappend="${reserva.estado == 'PENDIENTE'} ? 'bg-warning' : 
-                                                  ${reserva.estado == 'CONFIRMADA'} ? 'bg-success' : 
-                                                  'bg-secondary'"
-                                  th:text="${reserva.estado}">
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Paciente</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Fecha Nac.</th>
+            <th>Doctor</th>
+            <th>Teléfono Doctor</th>
+            <th>Servicio</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="reserva : ${reservas}">
+            <td th:text="${reserva.id}"></td>
+            <td th:text="${reserva.paciente.nombres} + ' ' + ${reserva.paciente.apellidos}"></td>
+            <td th:text="${reserva.paciente.email}"></td>
+            <td th:text="${reserva.paciente.telefono} ?: 'No disponible'"></td>
+            <td th:text="${reserva.paciente.fechaNacimiento}"></td>
+            <td th:text="${reserva.doctor.nombreCompleto}"></td>
+            <td th:text="${reserva.doctor.telefono} ?: 'No disponible'"></td>
+            <td th:text="${reserva.servicio.nombreServicio}"></td>
+            <td th:text="${reserva.fechaReserva}"></td>
+            <td th:text="${reserva.horaReserva}"></td>
+        </tr>
+    </tbody>
+</table>
         </div>
     </div>
 </body>

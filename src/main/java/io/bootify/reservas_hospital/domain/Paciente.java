@@ -38,8 +38,11 @@ public class Paciente {
     )
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String nombreCompleto;
+    @Column(nullable = false, length = 50)
+    private String nombres;
+
+    @Column(nullable = false, length = 50)
+    private String apellidos;
 
     @Column(nullable = false, length = 100)
     private String email;
@@ -47,7 +50,7 @@ public class Paciente {
     @Column(length = 20)
     private String telefono;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate fechaNacimiento;
 
     @OneToMany(mappedBy = "paciente")
@@ -60,4 +63,9 @@ public class Paciente {
     @LastModifiedDate
     @Column(nullable = false)
     private OffsetDateTime lastUpdated;
+
+    // Método para obtener nombre completo
+    public String getNombreCompleto() {
+        return nombres + " " + apellidos;
+    }
 }

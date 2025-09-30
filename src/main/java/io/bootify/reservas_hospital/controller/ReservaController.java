@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.List;
 
 @Controller
 @RequestMapping("/reservas")
@@ -33,7 +34,7 @@ public class ReservaController {
 
     @GetMapping("/nueva")
     public String mostrarFormularioReserva(Model model) {
-        System.out.println("✅ Accediendo a /reservas/nueva");
+        System.out.println("Accediendo a /reservas/nueva");
         model.addAttribute("doctores", doctorRepository.findAll());
         model.addAttribute("servicios", serviciosMedicoRepository.findAll());
         model.addAttribute("reserva", new Reserva());
@@ -42,7 +43,10 @@ public class ReservaController {
 
     @PostMapping("/crear")
     public String crearReserva(@RequestParam String emailPaciente,
-                             @RequestParam String nombrePaciente,
+                             @RequestParam String nombresPaciente,
+                             @RequestParam String apellidosPaciente,
+                             @RequestParam String telefonoPaciente,
+                             @RequestParam String fechaNacimientoPaciente,
                              @RequestParam Long doctorId,
                              @RequestParam Long servicioId,
                              @RequestParam String fechaReserva,
@@ -50,16 +54,28 @@ public class ReservaController {
                              Model model) {
         
         try {
-            System.out.println("✅ Creando reserva para: " + emailPaciente);
+            System.out.println("Creando reserva para: " + emailPaciente);
             
             // Buscar o crear paciente
             Paciente paciente = pacienteRepository.findByEmail(emailPaciente)
                     .orElseGet(() -> {
                         Paciente nuevoPaciente = new Paciente();
-                        nuevoPaciente.setNombreCompleto(nombrePaciente);
+                        nuevoPaciente.setNombres(nombresPaciente);
+                        nuevoPaciente.setApellidos(apellidosPaciente);
+                        nuevoPaciente.setTelefono(telefonoPaciente);
+                        nuevoPaciente.setFechaNacimiento(java.time.LocalDate.parse(fechaNacimientoPaciente));
                         nuevoPaciente.setEmail(emailPaciente);
                         return pacienteRepository.save(nuevoPaciente);
                     });
+
+            // si ya existe, actualizar
+            if (paciente.getId() != null) {
+                paciente.setNombres(nombresPaciente);
+                paciente.setApellidos(apellidosPaciente);
+                paciente.setTelefono(telefonoPaciente);
+                paciente.setFechaNacimiento(java.time.LocalDate.parse(fechaNacimientoPaciente));
+                pacienteRepository.save(paciente);
+            }
 
             // Buscar doctor y servicio
             Doctor doctor = doctorRepository.findById(doctorId)
@@ -79,11 +95,11 @@ public class ReservaController {
             
             reservaRepository.save(reserva);
             
-            System.out.println("✅ Reserva creada exitosamente");
+            System.out.println("Reserva creada exitosamente");
             return "redirect:/reservas/exito";
             
         } catch (Exception e) {
-            System.out.println("❌ Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             model.addAttribute("error", "Error: " + e.getMessage());
             model.addAttribute("doctores", doctorRepository.findAll());
             model.addAttribute("servicios", serviciosMedicoRepository.findAll());
@@ -97,8 +113,19 @@ public class ReservaController {
     }
 
     @GetMapping("/listar")
-    public String listarReservas(Model model) {
-        model.addAttribute("reservas", reservaRepository.findAll());
-        return "lista-reservas";
+public String listarReservas(Model model) {
+    System.out.println("✅ Accediendo a /reservas/listar");
+    
+    List<Reserva> reservas = reservaRepository.findAll();
+    System.out.println("📊 Reservas encontradas: " + reservas.size());
+    
+    for (Reserva reserva : reservas) {
+        System.out.println("   - Reserva ID: " + reserva.getId() + 
+                          ", Paciente: " + reserva.getPaciente().getNombreCompleto() +
+                          ", Estado: " + reserva.getEstado());
     }
+    
+    model.addAttribute("reservas", reservas);
+    return "lista-reservas";
+}
 }
