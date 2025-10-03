@@ -2,11 +2,16 @@ package io.bootify.reservas_hospital.config;
 
 import io.bootify.reservas_hospital.domain.Doctor;
 import io.bootify.reservas_hospital.domain.ServiciosMedico;
+import io.bootify.reservas_hospital.domain.Usuario;
 import io.bootify.reservas_hospital.repos.DoctorRepository;
 import io.bootify.reservas_hospital.repos.ServiciosMedicoRepository;
+import io.bootify.reservas_hospital.repos.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class DataLoader implements CommandLineRunner {
@@ -16,6 +21,12 @@ public class DataLoader implements CommandLineRunner {
 
     @Autowired
     private ServiciosMedicoRepository serviciosMedicoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
@@ -28,53 +39,58 @@ public class DataLoader implements CommandLineRunner {
             crearServiciosMedicos();
         }
         
-        System.out.println("Datos de prueba creados exitosamente");
-        System.out.println("Doctores en BD: " + doctorRepository.count());
-        System.out.println("Servicios en BD: " + serviciosMedicoRepository.count());
+        if (usuarioRepository.count() == 0) {
+            crearUsuariosPrueba();
+        }
+        
+        System.out.println(" Datos de prueba creados exitosamente");
+        System.out.println(" Doctores en BD: " + doctorRepository.count());
+        System.out.println(" Servicios en BD: " + serviciosMedicoRepository.count());
+        System.out.println(" Usuarios en BD: " + usuarioRepository.count());
     }
 
     private void crearDoctores() {
-    Doctor doctor1 = new Doctor();
-    doctor1.setNombreCompleto("Dr. Fernando Torres");
-    doctor1.setEspecialidad("Neurología");
-    doctor1.setEmail("fernando.torres@clinica.com");
-    doctor1.setTelefono("3001112233");
-    doctor1.setActivo(true);
-    doctorRepository.save(doctor1);
+        // Crear doctores de ejemplo
+        Doctor doctor1 = new Doctor();
+        doctor1.setNombreCompleto("Dr. Juan Pérez");
+        doctor1.setEspecialidad("Cardiología");
+        doctor1.setEmail("juan.perez@clinica.com");
+        doctor1.setTelefono("+57 123 456 7890");
+        doctor1.setActivo(true);
+        doctorRepository.save(doctor1);
 
-    Doctor doctor2 = new Doctor();
-    doctor2.setNombreCompleto("Dra. Sofia Ramirez");
-    doctor2.setEspecialidad("Oftalmología");
-    doctor2.setEmail("sofia.ramirez@clinica.com");
-    doctor2.setTelefono("3012223344");
-    doctor2.setActivo(true);
-    doctorRepository.save(doctor2);
+        Doctor doctor2 = new Doctor();
+        doctor2.setNombreCompleto("Dra. María García");
+        doctor2.setEspecialidad("Pediatría");
+        doctor2.setEmail("maria.garcia@clinica.com");
+        doctor2.setTelefono("+57 098 765 4321");
+        doctor2.setActivo(true);
+        doctorRepository.save(doctor2);
 
-    Doctor doctor3 = new Doctor();
-    doctor3.setNombreCompleto("Dr. Andres Castillo");
-    doctor3.setEspecialidad("Ortopedia");
-    doctor3.setEmail("andres.castillo@clinica.com");
-    doctor3.setTelefono("3023334455");
-    doctor3.setActivo(true);
-    doctorRepository.save(doctor3);
+        Doctor doctor3 = new Doctor();
+        doctor3.setNombreCompleto("Dr. Carlos López");
+        doctor3.setEspecialidad("Dermatología");
+        doctor3.setEmail("carlos.lopez@clinica.com");
+        doctor3.setTelefono("+57 555 123 4567");
+        doctor3.setActivo(true);
+        doctorRepository.save(doctor3);
 
-    Doctor doctor4 = new Doctor();
-    doctor4.setNombreCompleto("Dra. Valentina Herrera");
-    doctor4.setEspecialidad("Psiquiatría");
-    doctor4.setEmail("valentina.herrera@clinica.com");
-    doctor4.setTelefono("3034445566");
-    doctor4.setActivo(true);
-    doctorRepository.save(doctor4);
+        Doctor doctor4 = new Doctor();
+        doctor4.setNombreCompleto("Dra. Ana Martínez");
+        doctor4.setEspecialidad("Ginecología");
+        doctor4.setEmail("ana.martinez@clinica.com");
+        doctor4.setTelefono("+57 555 765 4321");
+        doctor4.setActivo(true);
+        doctorRepository.save(doctor4);
 
-    Doctor doctor5 = new Doctor();
-    doctor5.setNombreCompleto("Dr. Sebastian Gomez");
-    doctor5.setEspecialidad("Medicina Interna");
-    doctor5.setEmail("sebastian.gomez@clinica.com");
-    doctor5.setTelefono("3045556677");
-    doctor5.setActivo(true);
-    doctorRepository.save(doctor5);
-}
-
+        Doctor doctor5 = new Doctor();
+        doctor5.setNombreCompleto("Dr. Roberto Silva");
+        doctor5.setEspecialidad("Ortopedia");
+        doctor5.setEmail("roberto.silva@clinica.com");
+        doctor5.setTelefono("+57 444 888 9999");
+        doctor5.setActivo(true);
+        doctorRepository.save(doctor5);
+    }
 
     private void crearServiciosMedicos() {
         // Crear servicios médicos de ejemplo
@@ -112,5 +128,41 @@ public class DataLoader implements CommandLineRunner {
         servicio5.setDescripcion("Toma de muestras para análisis de laboratorio");
         servicio5.setActivo(true);
         serviciosMedicoRepository.save(servicio5);
+    }
+
+    private void crearUsuariosPrueba() {
+        // Obtener todos los doctores recién creados
+        List<Doctor> doctores = doctorRepository.findAll();
+        
+        if (doctores.size() >= 5) {
+            // Crear usuarios para cada doctor usando los IDs reales
+            crearUsuarioDoctor(doctores.get(0).getEmail(), "doctor123", "DOCTOR", doctores.get(0));
+            crearUsuarioDoctor(doctores.get(1).getEmail(), "doctor123", "DOCTOR", doctores.get(1));
+            crearUsuarioDoctor(doctores.get(2).getEmail(), "doctor123", "DOCTOR", doctores.get(2));
+            crearUsuarioDoctor(doctores.get(3).getEmail(), "doctor123", "DOCTOR", doctores.get(3));
+            crearUsuarioDoctor(doctores.get(4).getEmail(), "doctor123", "DOCTOR", doctores.get(4));
+        }
+
+        // Usuario Paciente
+        Usuario pacienteUser = new Usuario();
+        pacienteUser.setEmail("paciente@clinica.com");
+        pacienteUser.setPassword(passwordEncoder.encode("paciente123"));
+        pacienteUser.setRol("PACIENTE");
+        pacienteUser.setActivo(true);
+        usuarioRepository.save(pacienteUser);
+
+        System.out.println(" Usuarios de prueba creados:");
+        System.out.println("   Doctores: juan.perez@clinica.com, maria.garcia@clinica.com, etc. / doctor123");
+        System.out.println("   Paciente: paciente@clinica.com / paciente123");
+    }
+
+    private void crearUsuarioDoctor(String email, String password, String rol, Doctor doctor) {
+        Usuario usuarioDoctor = new Usuario();
+        usuarioDoctor.setEmail(email);
+        usuarioDoctor.setPassword(passwordEncoder.encode(password));
+        usuarioDoctor.setRol(rol);
+        usuarioDoctor.setDoctor(doctor); // Relacionar con el doctor
+        usuarioDoctor.setActivo(true);
+        usuarioRepository.save(usuarioDoctor);
     }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Nueva Reserva - Clínica Médica</title>
@@ -9,6 +10,12 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/">🏥 Clínica Médica</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" sec:authentication="name"></span>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -38,17 +45,12 @@
             </div>
         </div>
         <div class="row mt-3">
-            <div class="col-md-4">
-                <label for="emailPaciente" class="form-label">Email *</label>
-                <input type="email" class="form-control" id="emailPaciente" 
-                       name="emailPaciente" required>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label for="telefonoPaciente" class="form-label">Teléfono</label>
                 <input type="tel" class="form-control" id="telefonoPaciente" 
                        name="telefonoPaciente" placeholder="+57 300 123 4567">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label for="fechaNacimientoPaciente" class="form-label">Fecha de Nacimiento *</label>
                 <input type="date" class="form-control" id="fechaNacimientoPaciente" 
                        name="fechaNacimientoPaciente" required>
@@ -58,53 +60,59 @@
 </div>
 
             <!-- Detalles de la cita -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5>Detalles de la Cita</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label for="doctorId" class="form-label">Doctor *</label>
-                            <select class="form-select" id="doctorId" name="doctorId" required>
-                                <option value="">Seleccionar doctor...</option>
-                                <option th:each="doctor : ${doctores}" 
-                                        th:value="${doctor.id}" 
-                                        th:data-telefono="${doctor.telefono}"
-                                        th:text="${doctor.nombreCompleto}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Teléfono del Doctor</label>
-                            <input type="text" class="form-control" id="doctorTelefono" 
-                                   readonly placeholder="Seleccione un doctor">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="servicioId" class="form-label">Servicio Médico *</label>
-                            <select class="form-select" id="servicioId" name="servicioId" required>
-                                <option value="">Seleccionar servicio...</option>
-                                <option th:each="servicio : ${servicios}" 
-                                        th:value="${servicio.id}" 
-                                        th:text="${servicio.nombreServicio}">
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-4">
-                            <label for="fechaReserva" class="form-label">Fecha *</label>
-                            <input type="date" class="form-control" id="fechaReserva" 
-                                   name="fechaReserva" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="horaReserva" class="form-label">Hora *</label>
-                            <input type="time" class="form-control" id="horaReserva" 
-                                   name="horaReserva" required>
-                        </div>
-                    </div>
-                </div>
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Detalles de la Cita</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="doctorId" class="form-label">Doctor *</label>
+                <select class="form-select" id="doctorId" name="doctorId" required>
+                    <option value="">Seleccionar doctor...</option>
+                    <option th:each="doctor : ${doctores}" 
+                            th:value="${doctor.id}" 
+                            th:data-telefono="${doctor.telefono}"
+                            th:text="${doctor.nombreCompleto}">
+                    </option>
+                </select>
             </div>
+            <div class="col-md-4">
+                <label class="form-label">Teléfono del Doctor</label>
+                <input type="text" class="form-control" id="doctorTelefono" 
+                       readonly placeholder="Seleccione un doctor">
+            </div>
+            <div class="col-md-4">
+                <label for="servicioId" class="form-label">Servicio Médico *</label>
+                <select class="form-select" id="servicioId" name="servicioId" required>
+                    <option value="">Seleccionar servicio...</option>
+                    <option th:each="servicio : ${servicios}" 
+                            th:value="${servicio.id}" 
+                            th:data-duracion="${servicio.duracionMinutos}"
+                            th:text="${servicio.nombreServicio}">
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <label class="form-label">Duración del Servicio</label>
+                <input type="text" class="form-control" id="duracionServicio" 
+                       readonly placeholder="Seleccione un servicio">
+            </div>
+            <div class="col-md-4">
+                <label for="fechaReserva" class="form-label">Fecha *</label>
+                <input type="date" class="form-control" id="fechaReserva" 
+                       name="fechaReserva" required>
+            </div>
+            <div class="col-md-4">
+                <label for="horaReserva" class="form-label">Hora *</label>
+                <input type="time" class="form-control" id="horaReserva" 
+                       name="horaReserva" required>
+            </div>
+        </div>
+    </div>
+</div>
 
             <button type="submit" class="btn btn-primary">Agendar Cita</button>
             <a href="/reservas/listar" class="btn btn-secondary">Ver Reservas</a>
@@ -128,6 +136,20 @@
             telefonoInput.value = selectedOption.getAttribute('data-telefono');
         } else {
             telefonoInput.value = "No disponible";
+        }
+    });
+    
+    // Mostrar duración del servicio seleccionado
+    document.getElementById('servicioId').addEventListener('change', function() {
+        const servicioSelect = this;
+        const duracionInput = document.getElementById('duracionServicio');
+        const selectedOption = servicioSelect.options[servicioSelect.selectedIndex];
+        
+        if (selectedOption.value && selectedOption.getAttribute('data-duracion')) {
+            const duracion = selectedOption.getAttribute('data-duracion');
+            duracionInput.value = duracion + " minutos";
+        } else {
+            duracionInput.value = "No disponible";
         }
     });
 </script>

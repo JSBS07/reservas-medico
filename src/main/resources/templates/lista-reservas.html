@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Lista de Reservas - Clínica Médica</title>
@@ -9,6 +10,12 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/">🏥 Clínica Médica</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" sec:authentication="name"></span>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -30,12 +37,11 @@
         <tr>
             <th>ID</th>
             <th>Paciente</th>
-            <th>Email</th>
             <th>Teléfono</th>
             <th>Fecha Nac.</th>
             <th>Doctor</th>
-            <th>Teléfono Doctor</th>
             <th>Servicio</th>
+            <th>Duración</th>
             <th>Fecha</th>
             <th>Hora</th>
         </tr>
@@ -44,12 +50,11 @@
         <tr th:each="reserva : ${reservas}">
             <td th:text="${reserva.id}"></td>
             <td th:text="${reserva.paciente.nombres} + ' ' + ${reserva.paciente.apellidos}"></td>
-            <td th:text="${reserva.paciente.email}"></td>
             <td th:text="${reserva.paciente.telefono} ?: 'No disponible'"></td>
             <td th:text="${reserva.paciente.fechaNacimiento}"></td>
             <td th:text="${reserva.doctor.nombreCompleto}"></td>
-            <td th:text="${reserva.doctor.telefono} ?: 'No disponible'"></td>
             <td th:text="${reserva.servicio.nombreServicio}"></td>
+            <td th:text="${reserva.servicio.duracionMinutos} + ' min'"></td>
             <td th:text="${reserva.fechaReserva}"></td>
             <td th:text="${reserva.horaReserva}"></td>
         </tr>

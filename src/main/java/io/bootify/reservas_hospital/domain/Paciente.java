@@ -44,9 +44,6 @@ public class Paciente {
     @Column(nullable = false, length = 50)
     private String apellidos;
 
-    @Column(nullable = false, length = 100)
-    private String email;
-
     @Column(length = 20)
     private String telefono;
 
