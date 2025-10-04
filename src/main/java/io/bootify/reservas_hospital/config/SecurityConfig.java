@@ -17,11 +17,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Público
-                .requestMatchers("/", "/login", "/css/**", "/js/**").permitAll()
+                // Público - PERMITE ACCESO ANÓNIMO A ESTAS RUTAS
+                .requestMatchers("/", "/index", "/home", "/login", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 
                 // Rutas de paciente
-                .requestMatchers("/reservas/nueva", "/reservas/crear", "/reservas/exito", "/reservas/listar").hasAuthority("PACIENTE")
+                .requestMatchers("/reservas/nueva", "/reservas/crear", "/reservas/exito", "/reservas/listar", "/reservas/cancelar/**").hasAuthority("PACIENTE")
                 
                 // Rutas de doctor
                 .requestMatchers("/doctor/**").hasAuthority("DOCTOR")
@@ -37,14 +37,15 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             )
             .exceptionHandling(exception -> exception
                 .accessDeniedPage("/access-denied")
-            );
+            )
+            .csrf(csrf -> csrf.disable());
 
         return http.build();
     }

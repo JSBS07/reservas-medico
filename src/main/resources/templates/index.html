@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCitas - Reserva tu cita médica</title>
+    <link rel="stylesheet" href="/css/index.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__logo">
+                <h2>MediCitas</h2>
+            </div>
+            <ul class="nav__menu">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#servicios">Especialidades</a></li>
+                <li><a href="#proceso">Cómo funciona</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+            <div class="nav__actions">
+                <a href="/login" class="btn btn--secondary">Iniciar Sesión</a>
+            </div>
+        </nav>
+    </header>
+
+    <section id="inicio" class="hero">
+        <div class="hero__content">
+            <h1 class="hero__title">Reserva tu cita médica de manera rápida y segura</h1>
+            <p class="hero__description">
+                Encuentra especialistas verificados, compara horarios y confirma tu cita en minutos.
+                Plataforma diseñada para inspirar confianza, profesionalismo y accesibilidad.
+            </p>
+            <div class="hero__actions">
+                <a href="/login" class="btn btn--primary btn--large">Reservar cita</a>
+                <a href="#servicios" class="btn btn--outline btn--large">Ver especialidades</a>
+            </div>
+        </div>
+        <div class="hero__image">
+            <img src="https://images.unsplash.com/photo-1758691463198-dc663b8a64e4?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Servicios médicos" class="hero__img">
+        </div>
+    </section>
+
+    <section id="servicios" class="services">
+        <div class="container">
+            <h2 class="section__title">Servicios Médicos Disponibles</h2>
+            <p class="section__subtitle">Descubre los servicios que puedes reservar en nuestra plataforma</p>
+
+            <div class="services__grid">
+                <!-- Servicio 1 -->
+                <div class="service__card" data-service="consulta-general">
+                    <div class="service__header">
+                        <i class="fas fa-stethoscope service__icon"></i>
+                        <div class="service__duration">
+                            <i class="fas fa-clock"></i>
+                            <span>30 min</span>
+                        </div>
+                    </div>
+                    <h3 class="service__name">Consulta General</h3>
+                    <p class="service__description">Consulta médica general para evaluación de salud completa y
+                        diagnóstico inicial</p>
+                    <div class="service__features">
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Evaluación integral
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Diagnóstico inicial
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Recomendaciones personalizadas
+                        </span>
+                    </div>
+                    <div class="service__availability">
+                        <span class="availability__badge available">
+                            <i class="fas fa-calendar-check"></i>
+                            Disponible para reservar
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Servicio 2 -->
+                <div class="service__card" data-service="consulta-especializada">
+                    <div class="service__header">
+                        <i class="fas fa-user-md service__icon"></i>
+                        <div class="service__duration">
+                            <i class="fas fa-clock"></i>
+                            <span>45 min</span>
+                        </div>
+                    </div>
+                    <h3 class="service__name">Consulta Especializada</h3>
+                    <p class="service__description">Consulta con médico especialista en áreas específicas de la medicina
+                    </p>
+                    <div class="service__features">
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Especialista certificado
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Diagnóstico avanzado
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Tratamiento especializado
+                        </span>
+                    </div>
+                    <div class="service__availability">
+                        <span class="availability__badge available">
+                            <i class="fas fa-calendar-check"></i>
+                            Disponible para reservar
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Servicio 3 -->
+                <div class="service__card" data-service="chequeo-anual">
+                    <div class="service__header">
+                        <i class="fas fa-heartbeat service__icon"></i>
+                        <div class="service__duration">
+                            <i class="fas fa-clock"></i>
+                            <span>60 min</span>
+                        </div>
+                    </div>
+                    <h3 class="service__name">Chequeo Anual</h3>
+                    <p class="service__description">Evaluación médica completa anual para prevención y detección
+                        temprana</p>
+                    <div class="service__features">
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Examen físico completo
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Análisis de resultados
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Plan preventivo personalizado
+                        </span>
+                    </div>
+                    <div class="service__availability">
+                        <span class="availability__badge available">
+                            <i class="fas fa-calendar-check"></i>
+                            Disponible para reservar
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Servicio 4 -->
+                <div class="service__card" data-service="vacunacion">
+                    <div class="service__header">
+                        <i class="fas fa-syringe service__icon"></i>
+                        <div class="service__duration">
+                            <i class="fas fa-clock"></i>
+                            <span>15 min</span>
+                        </div>
+                    </div>
+                    <h3 class="service__name">Vacunación</h3>
+                    <p class="service__description">Aplicación de vacunas según esquema nacional y necesidades
+                        específicas</p>
+                    <div class="service__features">
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Vacunas autorizadas
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Control de temperatura
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Seguimiento post-vacuna
+                        </span>
+                    </div>
+                    <div class="service__availability">
+                        <span class="availability__badge available">
+                            <i class="fas fa-calendar-check"></i>
+                            Disponible para reservar
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Servicio 5 -->
+                <div class="service__card" data-service="examen-laboratorio">
+                    <div class="service__header">
+                        <i class="fas fa-vial service__icon"></i>
+                        <div class="service__duration">
+                            <i class="fas fa-clock"></i>
+                            <span>20 min</span>
+                        </div>
+                    </div>
+                    <h3 class="service__name">Examen de Laboratorio</h3>
+                    <p class="service__description">Toma de muestras para análisis clínicos y diagnóstico de laboratorio
+                    </p>
+                    <div class="service__features">
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Toma de muestras profesional
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Análisis preciso
+                        </span>
+                        <span class="service__feature">
+                            <i class="fas fa-check"></i>
+                            Resultados digitales seguros
+                        </span>
+                    </div>
+                    <div class="service__availability">
+                        <span class="availability__badge available">
+                            <i class="fas fa-calendar-check"></i>
+                            Disponible para reservar
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="proceso" class="process">
+        <div class="container">
+            <h2 class="section__title">Nuestro proceso de reserva</h2>
+            <div class="process__grid">
+                <div class="process__step">
+                    <div class="process__number">1</div>
+                    <div class="process__image">
+                        <img src="https://images.unsplash.com/photo-1758691462413-b07dee2933fe?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="Buscar especialista">
+                    </div>
+                    <h3>Busca tu especialista</h3>
+                    <p>Encuentra al profesional médico que necesitas según tu ubicación y disponibilidad.</p>
+                </div>
+                <div class="process__step">
+                    <div class="process__number">2</div>
+                    <div class="process__image">
+                        <img src="https://plus.unsplash.com/premium_photo-1704477658142-d0af9445b7e4?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="Seleccionar horario">
+                    </div>
+                    <h3>Selecciona horario</h3>
+                    <p>Elige el día y hora que mejor se adapte a tu agenda personal.</p>
+                </div>
+                <div class="process__step">
+                    <div class="process__number">3</div>
+                    <div class="process__image">
+                        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="Confirmar cita">
+                    </div>
+                    <h3>Confirma tu cita</h3>
+                    <p>Recibe confirmación inmediata</p>
+                </div>
+                <div class="process__step">
+                    <div class="process__number">4</div>
+                    <div class="process__image">
+                        <img src="https://images.unsplash.com/photo-1758691463384-771db2f192b3?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="Asistir a consulta">
+                    </div>
+                    <h3>Asiste a tu consulta</h3>
+                    <p>Acude a tu cita con toda la información organizada.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" id="contacto">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__info">
+                    <h3>MediCitas</h3>
+                    <p>Tu salud en las mejores manos</p>
+                </div>
+                <div class="footer__copyright">
+                    <p>&copy; 2024 MediCitas. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/js/index.js"></script>
+</body>
+
+</html>

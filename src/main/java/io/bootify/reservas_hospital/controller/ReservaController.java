@@ -4,14 +4,18 @@ import io.bootify.reservas_hospital.domain.Doctor;
 import io.bootify.reservas_hospital.domain.Paciente;
 import io.bootify.reservas_hospital.domain.Reserva;
 import io.bootify.reservas_hospital.domain.ServiciosMedico;
+import io.bootify.reservas_hospital.domain.Usuario;
 import io.bootify.reservas_hospital.repos.DoctorRepository;
 import io.bootify.reservas_hospital.repos.PacienteRepository;
 import io.bootify.reservas_hospital.repos.ReservaRepository;
 import io.bootify.reservas_hospital.repos.ServiciosMedicoRepository;
+import io.bootify.reservas_hospital.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -31,30 +35,51 @@ public class ReservaController {
     @Autowired
     private ReservaRepository reservaRepository;
 
+    @Autowired
+    private AuthService authService;
+
     @GetMapping("/nueva")
+    @PreAuthorize("hasAuthority('PACIENTE')")
     public String mostrarFormularioReserva(Model model) {
-        System.out.println("Accediendo a /reservas/nueva");
-        model.addAttribute("doctores", doctorRepository.findAll());
-        model.addAttribute("servicios", serviciosMedicoRepository.findAll());
-        model.addAttribute("reserva", new Reserva());
-        return "nueva-reserva";
+
+        try {
+            Usuario usuarioActual = authService.getUsuarioActual();
+            if (usuarioActual == null) {
+                return "redirect:/login?error=usuario_no_autenticado";
+            }
+
+            model.addAttribute("doctores", doctorRepository.findAll());
+            model.addAttribute("servicios", serviciosMedicoRepository.findAll());
+            model.addAttribute("reserva", new Reserva());
+            model.addAttribute("usuarioActual", usuarioActual);
+
+            return "nueva-reserva";
+
+        } catch (Exception e) {
+            return "redirect:/login?error=error_interno";
+        }
     }
 
     @PostMapping("/crear")
+    @PreAuthorize("hasAuthority('PACIENTE')")
     public String crearReserva(@RequestParam String nombresPaciente,
-                               @RequestParam String apellidosPaciente,
-                               @RequestParam String telefonoPaciente,
-                               @RequestParam String fechaNacimientoPaciente,
-                               @RequestParam Long doctorId,
-                               @RequestParam Long servicioId,
-                               @RequestParam String fechaReserva,
-                               @RequestParam String horaReserva,
-                               Model model) {
+            @RequestParam String apellidosPaciente,
+            @RequestParam String telefonoPaciente,
+            @RequestParam String fechaNacimientoPaciente,
+            @RequestParam Long doctorId,
+            @RequestParam Long servicioId,
+            @RequestParam String fechaReserva,
+            @RequestParam String horaReserva,
+            Model model) {
 
         try {
-            System.out.println("Creando reserva para: " + nombresPaciente + " " + apellidosPaciente);
+            // Obtener el usuario autenticado que crea la reserva
+            Usuario usuarioCreador = authService.getUsuarioActual();
+            if (usuarioCreador == null) {
+                return "redirect:/login?error=usuario_no_autenticado";
+            }
 
-            // Crear y guardar paciente nuevo 
+            // Crear y guardar paciente
             Paciente nuevoPaciente = new Paciente();
             nuevoPaciente.setNombres(nombresPaciente);
             nuevoPaciente.setApellidos(apellidosPaciente);
@@ -78,14 +103,12 @@ public class ReservaController {
             reserva.setFechaReserva(java.time.LocalDate.parse(fechaReserva));
             reserva.setHoraReserva(java.time.LocalTime.parse(horaReserva));
             reserva.setEstado("PENDIENTE");
-
-            reservaRepository.save(reserva);
-
-            System.out.println("Reserva creada exitosamente para: " + nombresPaciente + " " + apellidosPaciente);
+            reserva.setUsuarioCreador(usuarioCreador);
+            Reserva reservaGuardada = reservaRepository.save(reserva);
             return "redirect:/reservas/exito";
 
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
             model.addAttribute("error", "Error: " + e.getMessage());
             model.addAttribute("doctores", doctorRepository.findAll());
             model.addAttribute("servicios", serviciosMedicoRepository.findAll());
@@ -94,30 +117,89 @@ public class ReservaController {
     }
 
     @GetMapping("/exito")
+    @PreAuthorize("hasAuthority('PACIENTE')")
     public String mostrarExito() {
         return "reserva-exitosa";
     }
 
     @GetMapping("/listar")
+    @PreAuthorize("hasAuthority('PACIENTE')")
     public String listarReservas(Model model) {
-        System.out.println("✅ Accediendo a /reservas/listar");
 
-        List<Reserva> reservas = reservaRepository.findAll();
-        System.out.println("📊 Reservas encontradas: " + reservas.size());
+        try {
+            // Obtener el usuario autenticado
+            Usuario usuarioActual = authService.getUsuarioActual();
 
-        for (Reserva reserva : reservas) {
-            String pacienteNombre = "";
-            try {
-                pacienteNombre = reserva.getPaciente().getNombreCompleto();
-            } catch (Exception ex) {
-                pacienteNombre = reserva.getPaciente().getNombres() + " " + reserva.getPaciente().getApellidos();
+            if (usuarioActual == null) {
+                return "redirect:/login?error=usuario_no_autenticado";
             }
-            System.out.println("   - Reserva ID: " + reserva.getId() +
-                    ", Paciente: " + pacienteNombre +
-                    ", Estado: " + reserva.getEstado());
+
+            // Obtener SOLO las reservas creadas por este usuario
+            List<Reserva> reservas = reservaRepository.findByUsuarioCreadorId(usuarioActual.getId());
+
+            model.addAttribute("reservas", reservas);
+            model.addAttribute("usuarioActual", usuarioActual);
+
+            return "lista-reservas";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/login?error=error_interno";
+        }
+    }
+
+    @PostMapping("/cancelar/{id}")
+    @PreAuthorize("hasAuthority('PACIENTE')")
+    public String cancelarReserva(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            // Obtener el usuario autenticado
+            Usuario usuarioActual = authService.getUsuarioActual();
+
+            if (usuarioActual == null) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no autenticado");
+                return "redirect:/login";
+            }
+
+            java.util.Optional<Reserva> reservaOpt = reservaRepository.findById(id);
+
+            if (reservaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Reserva no encontrada");
+                return "redirect:/reservas/listar";
+            }
+            
+            Reserva reserva = reservaOpt.get();
+
+            // Verificar que la reserva pertenezca al usuario autenticado
+            if (reserva.getUsuarioCreador() == null ||
+                    !reserva.getUsuarioCreador().getId().equals(usuarioActual.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permisos para cancelar esta reserva");
+                return "redirect:/reservas/listar";
+            }
+
+            // Verificar que la reserva no esté ya cancelada
+            if ("CANCELADA".equals(reserva.getEstado())) {
+                redirectAttributes.addFlashAttribute("warning", "La reserva ya está cancelada");
+                return "redirect:/reservas/listar";
+            }
+
+            // Verificar que la reserva no esté confirmada
+            if ("CONFIRMADA".equals(reserva.getEstado())) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No se puede cancelar una reserva confirmada. Contacta con la clínica.");
+                return "redirect:/reservas/listar";
+            }
+
+            // Cancelar la reserva
+            reserva.setEstado("CANCELADA");
+            reservaRepository.save(reserva);
+
+            redirectAttributes.addFlashAttribute("success", "Reserva cancelada exitosamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar la reserva: " + e.getMessage());
         }
 
-        model.addAttribute("reservas", reservas);
-        return "lista-reservas";
+        return "redirect:/reservas/listar";
     }
 }

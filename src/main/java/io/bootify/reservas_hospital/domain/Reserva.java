@@ -60,6 +60,10 @@ public class Reserva {
     @JoinColumn(name = "servicio_id", nullable = false)
     private ServiciosMedico servicio;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_creador_id", nullable = false)
+    private Usuario usuarioCreador;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime dateCreated;
