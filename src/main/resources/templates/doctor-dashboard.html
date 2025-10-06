@@ -1,114 +1,189 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Doctor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Doctor - MediCitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/reservas.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">Clinica Medica</a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">
-                    <span sec:authentication="name"></span>
-                    - <span th:text="${doctor.nombreCompleto}"></span>
-                </span>
-                <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-outline-light">Cerrar Sesion</button>
-                </form>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-12">
-                <h1>Panel del Doctor</h1>
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="'Bienvenido, ' + ${doctor.nombreCompleto}"></h5>
-                        <p class="card-text" th:text="'Total de citas asignadas: ' + ${totalReservas}"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Mis Citas Asignadas</h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:if="${reservas.empty}" class="alert alert-info">
-                            No tienes citas asignadas en este momento.
-                        </div>
-
-                        <div th:unless="${reservas.empty}" class="table-responsive">
-                            <table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Paciente</th>
-            <th>Telefono Paciente</th>
-            <th>Servicio</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="reserva : ${reservas}">
-            <td th:text="${reserva.id}"></td>
-            <td th:text="${reserva.paciente.nombres} + ' ' + ${reserva.paciente.apellidos}"></td>
-            <td th:text="${reserva.paciente.telefono} ?: 'No disponible'"></td>
-            <td th:text="${reserva.servicio.nombreServicio}"></td>
-            <td th:text="${reserva.fechaReserva}"></td>
-            <td th:text="${reserva.horaReserva}"></td>
-            <td>
-                <span th:if="${reserva.estado == 'PENDIENTE'}"
-                      class="badge bg-warning"
-                      th:text="${reserva.estado}"></span>
-                <span th:if="${reserva.estado == 'CONFIRMADA'}"
-                      class="badge bg-success"
-                      th:text="${reserva.estado}"></span>
-                <span th:if="${reserva.estado == 'CANCELADA'}"
-                      class="badge bg-danger"
-                      th:text="${reserva.estado}"></span>
-                <span th:if="${reserva.estado == 'COMPLETADA'}"
-                      class="badge bg-info"
-                      th:text="${reserva.estado}"></span>
-            </td>
-            <td>
-                <div class="btn-group" role="group">
-                    <form th:action="@{/doctor/reservas/{id}/estado(id=${reserva.id})}" method="post" class="d-inline">
-                        <select name="nuevoEstado" class="form-select form-select-sm" onchange="this.form.submit()">
-                            <option value="PENDIENTE" th:selected="${reserva.estado == 'PENDIENTE'}">Pendiente</option>
-                            <option value="CONFIRMADA" th:selected="${reserva.estado == 'CONFIRMADA'}">Confirmada</option>
-                            <option value="CANCELADA" th:selected="${reserva.estado == 'CANCELADA'}">Cancelada</option>
-                            <option value="COMPLETADA" th:selected="${reserva.estado == 'COMPLETADA'}">Completada</option>
-                        </select>
-                    </form>
-
-                    <form th:action="@{/doctor/reservas/{id}/eliminar(id=${reserva.id})}" method="post" class="d-inline ms-1">
-                        <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Esta seguro de eliminar esta reserva?')">
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
-            </td>
-        </tr>
-    </tbody>
-</table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<header class="app-bar">
+    <div class="app-bar__inner">
+        <a class="brand" href="/">
+            <span class="brand__icon"><i class="fas fa-staff-snake"></i></span>
+            <span class="brand__name">MediCitas</span>
+        </a>
+        <div class="app-bar__actions">
+            <span class="user-chip">
+                <i class="fas fa-user-md"></i>
+                <span th:text="${doctor.nombreCompleto}"></span>
+            </span>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-door-open"></i>
+                    Cerrar sesion
+                </button>
+            </form>
         </div>
     </div>
+</header>
+
+<main>
+    <section class="dashboard-hero">
+        <div class="dashboard-hero__content">
+            <h1 th:text="'Agenda ' + ${doctor.nombreCompleto}"></h1>
+            <p>
+                Consulta tus proximas atenciones, actualiza el estado de cada cita y mantente al tanto de tu volumen asistencial.
+            </p>
+        </div>
+        <div class="dashboard-hero__badge">
+            <i class="fas fa-hospital-user"></i>
+            <span>Gestor clinico en tiempo real</span>
+        </div>
+    </section>
+
+    <section class="metrics-grid">
+        <article class="metric-card">
+            <div class="metric-card__icon"><i class="fas fa-calendar-check"></i></div>
+            <div>
+                <span>Total de citas</span>
+                <h2 th:text="${totalReservas}">0</h2>
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-card__icon"><i class="fas fa-hourglass-half"></i></div>
+            <div>
+                <span>Pendientes</span>
+                <h2 th:text="${#lists.size(reservas.?[estado == 'PENDIENTE'])}">0</h2>
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-card__icon confirm"><i class="fas fa-circle-check"></i></div>
+            <div>
+                <span>Confirmadas</span>
+                <h2 th:text="${#lists.size(reservas.?[estado == 'CONFIRMADA'])}">0</h2>
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-card__icon alert"><i class="fas fa-triangle-exclamation"></i></div>
+            <div>
+                <span>Canceladas</span>
+                <h2 th:text="${#lists.size(reservas.?[estado == 'CANCELADA'])}">0</h2>
+            </div>
+        </article>
+    </section>
+
+    <section class="table-card">
+        <header>
+            <div>
+                <h1>Mis citas asignadas</h1>
+                <p>Mantenga el estado actualizado para que el equipo de atencion y tus pacientes reciban notificaciones oportunas.</p>
+            </div>
+            <div class="badge-note">
+                <i class="fas fa-chart-line"></i>
+                Monitor asistencial
+            </div>
+        </header>
+
+        <div th:if="${reservas.empty}" class="empty-state">
+            <i class="fas fa-calendar-minus" style="font-size: 2rem;"></i>
+            <p>No tienes citas asignadas en este momento.</p>
+        </div>
+
+        <div th:unless="${reservas.empty}" class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Paciente</th>
+                    <th>Contacto</th>
+                    <th>Servicio</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                    <th>Gestion</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reserva : ${reservas}">
+                    <td th:text="${reserva.id}"></td>
+                    <td>
+                        <strong th:text="${reserva.paciente.nombres}"></strong>
+                        <span th:text="${' ' + reserva.paciente.apellidos}"></span>
+                    </td>
+                    <td>
+                        <i class="fas fa-phone"></i>
+                        <span th:text="${reserva.paciente.telefono} ?: 'No disponible'"></span>
+                    </td>
+                    <td th:text="${reserva.servicio.nombreServicio}"></td>
+                    <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(reserva.horaReserva, 'HH:mm')}"></td>
+                    <td>
+                        <span th:switch="${reserva.estado}">
+                            <span th:case="'PENDIENTE'" class="status-pill pending">
+                                <i class="fas fa-clock"></i>
+                                Pendiente
+                            </span>
+                            <span th:case="'CONFIRMADA'" class="status-pill confirmed">
+                                <i class="fas fa-circle-check"></i>
+                                Confirmada
+                            </span>
+                            <span th:case="'CANCELADA'" class="status-pill cancelled">
+                                <i class="fas fa-circle-xmark"></i>
+                                Cancelada
+                            </span>
+                            <span th:case="'COMPLETADA'" class="status-pill completed">
+                                <i class="fas fa-hands-holding-circle"></i>
+                                Completada
+                            </span>
+                            <span th:case="*" class="status-pill">
+                                <i class="fas fa-circle-info"></i>
+                                <span th:text="${reserva.estado}"></span>
+                            </span>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <form th:action="@{/doctor/reservas/{id}/estado(id=${reserva.id})}" method="post" class="status-form">
+                                <input type="hidden" th:if="${_csrf != null}"
+                                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <select name="nuevoEstado" class="status-select" onchange="this.form.submit()">
+                                    <option value="PENDIENTE" th:selected="${reserva.estado == 'PENDIENTE'}">Pendiente</option>
+                                    <option value="CONFIRMADA" th:selected="${reserva.estado == 'CONFIRMADA'}">Confirmada</option>
+                                    <option value="CANCELADA" th:selected="${reserva.estado == 'CANCELADA'}">Cancelada</option>
+                                    <option value="COMPLETADA" th:selected="${reserva.estado == 'COMPLETADA'}">Completada</option>
+                                </select>
+                            </form>
+                            <form th:action="@{/doctor/reservas/{id}/eliminar(id=${reserva.id})}" method="post" class="delete-form"
+                                  onsubmit="return confirm('Esta seguro de eliminar esta reserva?');">
+                                <input type="hidden" th:if="${_csrf != null}"
+                                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
 </body>
 </html>
+
+
+
+
+
+
+
+

@@ -1,52 +1,404 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Clínica Médica</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesion - MediCitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #10b981;
+            --secondary-dark: #059669;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --white: #ffffff;
+            --shadow-lg: 0 30px 60px -20px rgba(15, 23, 42, 0.35);
+            --radius-lg: 18px;
+            --radius-sm: 10px;
+            --transition: 0.3s ease;
+            --glass: rgba(255, 255, 255, 0.85);
+            --glass-dark: rgba(15, 23, 42, 0.65);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.25), transparent 55%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.2), transparent 50%), #0f172a;
+            color: var(--gray-900);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1580281658629-2b094c35c226?q=80&w=1440&auto=format&fit=crop') center/cover no-repeat;
+            opacity: 0.25;
+            z-index: -2;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(15, 118, 110, 0.45));
+            z-index: -1;
+        }
+        main {
+            width: 100%;
+            max-width: 1080px;
+        }
+        .login-shell {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            background: var(--glass);
+            backdrop-filter: blur(18px);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .brand-panel {
+            position: relative;
+            padding: 3rem;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.9), rgba(37, 99, 235, 0.55));
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .brand-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1584467735871-20fa8caaa45b?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
+            opacity: 0.18;
+        }
+        .brand-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .brand-logo span {
+            display: inline-flex;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+        }
+        .brand-logo h1 {
+            font-size: 1.8rem;
+            letter-spacing: 0.02em;
+        }
+        .brand-highlight {
+            margin-top: 3rem;
+        }
+        .brand-highlight h2 {
+            font-size: 2.25rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        .brand-highlight p {
+            font-size: 1.05rem;
+            color: rgba(241, 245, 249, 0.92);
+            max-width: 32ch;
+        }
+        .brand-stats {
+            margin-top: 3.5rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+        .stat-card {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            background: rgba(15, 23, 42, 0.35);
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.14);
+            color: var(--white);
+            font-size: 1.1rem;
+        }
+        .stat-info strong {
+            display: block;
+            font-size: 1rem;
+        }
+        .stat-info span {
+            font-size: 0.9rem;
+            color: rgba(226, 232, 240, 0.76);
+        }
+        .auth-panel {
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .auth-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .auth-header a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: transform var(--transition);
+        }
+        .auth-header a:hover {
+            transform: translateX(-3px);
+        }
+        .auth-header h2 {
+            font-size: 2rem;
+            color: var(--gray-900);
+        }
+        .auth-header p {
+            color: var(--gray-500);
+        }
+        .alert {
+            padding: 0.85rem 1.1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--secondary-dark);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .alert-danger {
+            background: rgba(248, 113, 113, 0.14);
+            color: #b91c1c;
+            border: 1px solid rgba(248, 113, 113, 0.35);
+        }
+        form {
+            display: grid;
+            gap: 1.5rem;
+        }
+        label {
+            font-size: 0.95rem;
+            color: var(--gray-700);
+            font-weight: 600;
+        }
+        .input-field {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+        .input-box {
+            display: flex;
+            align-items: center;
+            border-radius: 14px;
+            border: 1px solid var(--gray-300);
+            background: var(--white);
+            padding: 0.9rem 1rem;
+            gap: 0.75rem;
+            transition: border var(--transition), box-shadow var(--transition);
+        }
+        .input-box:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 12px 22px -16px rgba(37, 99, 235, 0.65);
+        }
+        .input-box i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        .input-box input {
+            border: 0;
+            outline: 0;
+            width: 100%;
+            font-size: 1rem;
+            color: var(--gray-900);
+        }
+        .input-box input::placeholder {
+            color: var(--gray-500);
+        }
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        button[type="submit"] {
+            border: 0;
+            border-radius: 14px;
+            padding: 0.95rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--white);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 20px 35px -20px rgba(37, 99, 235, 0.85);
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 40px -20px rgba(37, 99, 235, 0.95);
+        }
+        .support-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+        .support-links a {
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border var(--transition);
+        }
+        .support-links a:hover {
+            border-bottom-color: currentColor;
+        }
+        footer {
+            font-size: 0.85rem;
+            color: rgba(100, 116, 139, 0.9);
+            text-align: center;
+        }
+        @media (max-width: 1024px) {
+            body {
+                padding: 1.5rem;
+            }
+            .login-shell {
+                grid-template-columns: 1fr;
+            }
+            .brand-panel {
+                display: none;
+            }
+        }
+        @media (max-width: 540px) {
+            body {
+                padding: 1rem;
+            }
+            .auth-panel {
+                padding: 2.5rem 1.75rem;
+            }
+            .auth-header h2 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">🏥 Clínica Médica</a>
-        </div>
-    </nav>
-
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="text-center">Iniciar Sesión</h4>
+    <main>
+        <div class="login-shell">
+            <section class="brand-panel">
+                <div>
+                    <div class="brand-logo">
+                        <span><i class="fas fa-heartbeat"></i></span>
+                        <h1>MediCitas</h1>
                     </div>
-                    <div class="card-body">
-                        <!-- Mensaje de logout exitoso -->
-                        <div th:if="${param.logout}" class="alert alert-success">
-                            Has cerrado sesión exitosamente.
-                        </div>
-                        
-                        <!-- Mensaje de error de login -->
-                        <div th:if="${param.error}" class="alert alert-danger">
-                            Error en el login. Verifica tus credenciales.
-                        </div>
-                        
-                        <form th:action="@{/login}" method="post">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="username" name="username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-                        </form>
-                        
-                        
+                    <div class="brand-highlight">
+                        <h2>Confianza y cuidado en cada cita</h2>
+                        <p>Gestiona tus reservas con una plataforma creada para profesionales de la salud y pacientes que buscan tranquilidad.</p>
                     </div>
                 </div>
-            </div>
+                <div class="brand-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+                        <div class="stat-info">
+                            <strong>120+ especialistas</strong>
+                            <span>Doctores certificados listos para atenderte</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-hospital"></i></div>
+                        <div class="stat-info">
+                            <strong>Experiencia hospitalaria</strong>
+                            <span>Protocolos seguros y acompanamiento continuo</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="auth-panel">
+                <div class="auth-header">
+                    <a href="/" aria-label="Volver al inicio">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al inicio
+                    </a>
+                    <h2>Inicia sesion</h2>
+                    <p>Ingresa tus credenciales para acceder al tablero medico y gestionar las reservas.</p>
+                </div>
+
+                <div th:if="${param.logout}" class="alert alert-success">
+                    <i class="fas fa-circle-check"></i>
+                    Cierre de sesion exitoso.
+                </div>
+                <div th:if="${param.error}" class="alert alert-danger">
+                    <i class="fas fa-circle-exclamation"></i>
+                    Verifica tu correo o contrasena e intenta de nuevo.
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="input-field">
+                        <label for="username">Correo electronico</label>
+                        <div class="input-box">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="username" name="username" placeholder="tu correo corporativo" required>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label for="password">Contrasena</label>
+                        <div class="input-box">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="tu contrasena segura" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit">Ingresar</button>
+                        <div class="support-links">
+                            <span>Necesitas ayuda?</span>
+                            <a href="mailto:soporte@medicitas.com">Contactar soporte</a>
+                        </div>
+                    </div>
+                </form>
+
+                <footer>
+                    Acceso exclusivo para personal autorizado de la clinica. Protegemos tu informacion con protocolos de seguridad hospitalaria.
+                </footer>
+            </section>
         </div>
-    </div>
+    </main>
 </body>
 </html>

@@ -1,28 +1,55 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reserva Exitosa</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva confirmada - MediCitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/reservas.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">🏥 Clínica Médica</a>
+<header class="app-bar">
+    <div class="app-bar__inner">
+        <a class="brand" href="/">
+            <span class="brand__icon"><i class="fas fa-staff-snake"></i></span>
+            <span class="brand__name">MediCitas</span>
+        </a>
+        <div class="app-bar__actions">
+            <span class="badge-note">
+                <i class="fas fa-shield-heart"></i>
+                Seguridad hospitalaria activa
+            </span>
         </div>
-    </nav>
+    </div>
+</header>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6 text-center">
-                <div class="alert alert-success">
-                    <h2>✅ Reserva Confirmada</h2>
-                    <p>Tu cita médica ha sido agendada exitosamente.</p>
-                </div>
-                <a href="/reservas/nueva" class="btn btn-primary">Agendar Otra Cita</a>
-                <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+<main>
+    <div class="success-hero">
+        <div class="success-card">
+            <div class="success-card__icon">
+                <i class="fas fa-circle-check"></i>
+            </div>
+            <h1>Reserva confirmada</h1>
+            <p>Tu cita se registro correctamente. El paciente recibira un correo con la informacion de la consulta.</p>
+            <div class="form-actions" style="justify-content: center;">
+                <a href="/reservas/nueva" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus"></i>
+                    Agendar otra cita
+                </a>
+                <a href="/reservas/listar" class="btn btn-secondary">
+                    <i class="fas fa-list"></i>
+                    Ver mis reservas
+                </a>
+                <a href="/" class="btn btn-secondary">
+                    <i class="fas fa-house-medical"></i>
+                    Ir al inicio
+                </a>
             </div>
         </div>
     </div>
+</main>
 </body>
 </html>
