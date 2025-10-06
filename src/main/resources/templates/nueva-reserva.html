@@ -1,157 +1,221 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>Nueva Reserva - Clínica Médica</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Nueva Reserva - Clinica Medica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">🏥 Clínica Médica</a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3" sec:authentication="name"></span>
-                <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
-                </form>
-            </div>
-        </div>
-    </nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="/">Clinica Medica</a>
+    <div class="navbar-nav ms-auto">
+      <span class="navbar-text me-3" sec:authentication="name"></span>
+      <form th:action="@{/logout}" method="post" class="d-inline">
+        <input type="hidden" th:if="${_csrf != null}"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesion</button>
+      </form>
+    </div>
+  </div>
+</nav>
 
-    <div class="container mt-4">
-        <h1>Agendar Cita Médica</h1>
-        
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-        
-        <form th:action="@{/reservas/crear}" method="post">
+<div class="container mt-4">
+  <h1>Agendar Cita Medica</h1>
 
-            <!-- Datos del paciente -->
-<div class="card mb-3">
-    <div class="card-header">
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <form th:action="@{/reservas/crear}" th:object="${form}" method="post">
+    <input type="hidden" th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+    <!-- Datos del paciente -->
+    <div class="card mb-3">
+      <div class="card-header">
         <h5>Datos del Paciente</h5>
-    </div>
-    <div class="card-body">
+      </div>
+      <div class="card-body">
         <div class="row">
-            <div class="col-md-6">
-                <label for="nombresPaciente" class="form-label">Nombres *</label>
-                <input type="text" class="form-control" id="nombresPaciente" 
-                       name="nombresPaciente" required>
-            </div>
-            <div class="col-md-6">
-                <label for="apellidosPaciente" class="form-label">Apellidos *</label>
-                <input type="text" class="form-control" id="apellidosPaciente" 
-                       name="apellidosPaciente" required>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-md-6">
-                <label for="telefonoPaciente" class="form-label">Teléfono</label>
-                <input type="tel" class="form-control" id="telefonoPaciente" 
-                       name="telefonoPaciente" placeholder="+57 300 123 4567">
-            </div>
-            <div class="col-md-6">
-                <label for="fechaNacimientoPaciente" class="form-label">Fecha de Nacimiento *</label>
-                <input type="date" class="form-control" id="fechaNacimientoPaciente" 
-                       name="fechaNacimientoPaciente" required>
-            </div>
-        </div>
-    </div>
-</div>
+          <div class="col-md-6">
+            <label for="nombresPaciente" class="form-label">Nombres *</label>
+            <input type="text" class="form-control"
+                   id="nombresPaciente" th:field="*{nombresPaciente}"
+                   pattern="^(?=.{2,60}$)(?!.*\\s{2})(?=.*[AEIOUaeiou\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1])[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+(?:\\s[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+){0,3}$"
+                   autocomplete="name"
+                   th:classappend="${#fields.hasErrors('nombresPaciente')} ? ' is-invalid'">
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('nombresPaciente')}"
+                 th:errors="*{nombresPaciente}">Error</div>
+          </div>
 
-            <!-- Detalles de la cita -->
-<div class="card mb-3">
-    <div class="card-header">
+          <div class="col-md-6">
+            <label for="apellidosPaciente" class="form-label">Apellidos *</label>
+            <input type="text" class="form-control"
+                   id="apellidosPaciente" th:field="*{apellidosPaciente}"
+                   pattern="^(?=.{2,60}$)(?!.*\\s{2})(?=.*[AEIOUaeiou\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1])[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+(?:\\s[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+){0,3}$"
+                   autocomplete="family-name"
+                   th:classappend="${#fields.hasErrors('apellidosPaciente')} ? ' is-invalid'">
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('apellidosPaciente')}"
+                 th:errors="*{apellidosPaciente}">Error</div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label for="telefonoPaciente" class="form-label">Telefono *</label>
+            <input type="tel" class="form-control"
+                   id="telefonoPaciente" th:field="*{telefonoPaciente}"
+                   placeholder="+57 300 123 4567"
+                   pattern="^(?:\+57)?3[0-9]{9}$" inputmode="numeric" autocomplete="tel"
+                   title="Formato esperado: +57 opcional seguido de un numero movil de 10 digitos que inicia en 3"
+                   th:classappend="${#fields.hasErrors('telefonoPaciente')} ? ' is-invalid'">
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('telefonoPaciente')}"
+                 th:errors="*{telefonoPaciente}">Error</div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="fechaNacimientoPaciente" class="form-label">Fecha de Nacimiento *</label>
+            <input type="date" class="form-control"
+                   id="fechaNacimientoPaciente" th:field="*{fechaNacimientoPaciente}"
+                   th:classappend="${#fields.hasErrors('fechaNacimientoPaciente')} ? ' is-invalid'">
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('fechaNacimientoPaciente')}"
+                 th:errors="*{fechaNacimientoPaciente}">Error</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">
         <h5>Detalles de la Cita</h5>
-    </div>
-    <div class="card-body">
+      </div>
+      <div class="card-body">
         <div class="row">
-            <div class="col-md-4">
-                <label for="doctorId" class="form-label">Doctor *</label>
-                <select class="form-select" id="doctorId" name="doctorId" required>
-                    <option value="">Seleccionar doctor...</option>
-                    <option th:each="doctor : ${doctores}" 
-                            th:value="${doctor.id}" 
-                            th:data-telefono="${doctor.telefono}"
-                            th:text="${doctor.nombreCompleto}">
-                    </option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Teléfono del Doctor</label>
-                <input type="text" class="form-control" id="doctorTelefono" 
-                       readonly placeholder="Seleccione un doctor">
-            </div>
-            <div class="col-md-4">
-                <label for="servicioId" class="form-label">Servicio Médico *</label>
-                <select class="form-select" id="servicioId" name="servicioId" required>
-                    <option value="">Seleccionar servicio...</option>
-                    <option th:each="servicio : ${servicios}" 
-                            th:value="${servicio.id}" 
-                            th:data-duracion="${servicio.duracionMinutos}"
-                            th:text="${servicio.nombreServicio}">
-                    </option>
-                </select>
-            </div>
+          <div class="col-md-4">
+            <label for="doctorId" class="form-label">Doctor *</label>
+            <select class="form-select" id="doctorId" th:field="*{doctorId}"
+                    th:classappend="${#fields.hasErrors('doctorId')} ? ' is-invalid'">
+              <option value="" disabled
+                      th:selected="*{doctorId} == null">Seleccionar doctor...</option>
+              <option th:each="doctor : ${doctores}"
+                      th:value="${doctor.id}"
+                      th:data-telefono="${doctor.telefono}"
+                      th:text="${doctor.nombreCompleto}">
+              </option>
+            </select>
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('doctorId')}"
+                 th:errors="*{doctorId}">Error</div>
+          </div>
+
+          <div class="col-md-4">
+            <label for="doctorTelefono" class="form-label">Telefono del Doctor</label>
+            <input type="text" class="form-control" id="doctorTelefono" value="No disponible" readonly>
+          </div>
+
+          <div class="col-md-4">
+            <label for="servicioId" class="form-label">Servicio Medico *</label>
+            <select class="form-select" id="servicioId" th:field="*{servicioId}"
+                    th:classappend="${#fields.hasErrors('servicioId')} ? ' is-invalid'">
+              <option value="" disabled
+                      th:selected="*{servicioId} == null">Seleccionar servicio...</option>
+              <option th:each="servicio : ${servicios}"
+                      th:value="${servicio.id}"
+                      th:data-duracion="${servicio.duracionMinutos}"
+                      th:text="${servicio.nombreServicio}">
+              </option>
+            </select>
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('servicioId')}"
+                 th:errors="*{servicioId}">Error</div>
+          </div>
         </div>
+
         <div class="row mt-3">
-            <div class="col-md-4">
-                <label class="form-label">Duración del Servicio</label>
-                <input type="text" class="form-control" id="duracionServicio" 
-                       readonly placeholder="Seleccione un servicio">
-            </div>
-            <div class="col-md-4">
-                <label for="fechaReserva" class="form-label">Fecha *</label>
-                <input type="date" class="form-control" id="fechaReserva" 
-                       name="fechaReserva" required>
-            </div>
-            <div class="col-md-4">
-                <label for="horaReserva" class="form-label">Hora *</label>
-                <input type="time" class="form-control" id="horaReserva" 
-                       name="horaReserva" required>
-            </div>
+          <div class="col-md-4">
+            <label class="form-label">Duracion del Servicio</label>
+            <input type="text" class="form-control" id="duracionServicio" readonly
+                   placeholder="Seleccione un servicio">
+          </div>
+
+          <div class="col-md-4">
+            <label for="fechaReserva" class="form-label">Fecha *</label>
+            <input type="date" class="form-control"
+                   id="fechaReserva" th:field="*{fechaReserva}"
+                   th:classappend="${#fields.hasErrors('fechaReserva')} ? ' is-invalid'">
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('fechaReserva')}"
+                 th:errors="*{fechaReserva}">Error</div>
+          </div>
+
+          <div class="col-md-4">
+            <label for="horaReserva" class="form-label">Hora *</label>
+            <input type="time" class="form-control"
+                   id="horaReserva" th:field="*{horaReserva}"
+                   min="07:00" max="17:00" step="1800"
+                   th:classappend="${#fields.hasErrors('horaReserva')} ? ' is-invalid'">
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('horaReserva')}"
+                 th:errors="*{horaReserva}">Error</div>
+          </div>
         </div>
+      </div>
     </div>
+
+    <div class="col-12" th:if="${#fields.hasGlobalErrors()}">
+      <div class="alert alert-danger" th:each="e : ${#fields.globalErrors()}" th:text="${e}">Error global</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Agendar Cita</button>
+    <a th:href="@{/reservas/listar}" class="btn btn-secondary">Ver Reservas</a>
+  </form>
 </div>
 
-            <button type="submit" class="btn btn-primary">Agendar Cita</button>
-            <a href="/reservas/listar" class="btn btn-secondary">Ver Reservas</a>
-        </form>
-    </div>
+<script>
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
 
-    <script>
-    // Establecer fecha mínima como hoy para la reserva
-    document.getElementById('fechaReserva').min = new Date().toISOString().split('T')[0];
-    
-    // Validar fecha de nacimiento (no puede ser mayor a hoy)
-    document.getElementById('fechaNacimientoPaciente').max = new Date().toISOString().split('T')[0];
-    
-    // Mostrar teléfono del doctor seleccionado
-    document.getElementById('doctorId').addEventListener('change', function() {
-        const doctorSelect = this;
-        const telefonoInput = document.getElementById('doctorTelefono');
-        const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
-        
-        if (selectedOption.value && selectedOption.getAttribute('data-telefono')) {
-            telefonoInput.value = selectedOption.getAttribute('data-telefono');
-        } else {
-            telefonoInput.value = "No disponible";
-        }
+  const fechaReservaInput = document.getElementById('fechaReserva');
+  if (fechaReservaInput) {
+    fechaReservaInput.min = todayStr;
+  }
+
+  const fechaNacInput = document.getElementById('fechaNacimientoPaciente');
+  if (fechaNacInput) {
+    const minDob = new Date(yyyy - 95, today.getMonth(), today.getDate());
+    const maxDob = new Date(yyyy - 15, today.getMonth(), today.getDate());
+    const toStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    fechaNacInput.min = toStr(minDob);
+    fechaNacInput.max = toStr(maxDob);
+  }
+
+  const doctorSelect = document.getElementById('doctorId');
+  const doctorTelefono = document.getElementById('doctorTelefono');
+  if (doctorSelect && doctorTelefono) {
+    doctorSelect.addEventListener('change', function () {
+      const opt = this.options[this.selectedIndex];
+      const tel = opt && opt.getAttribute('data-telefono');
+      doctorTelefono.value = (this.value && tel) ? tel : 'No disponible';
     });
-    
-    // Mostrar duración del servicio seleccionado
-    document.getElementById('servicioId').addEventListener('change', function() {
-        const servicioSelect = this;
-        const duracionInput = document.getElementById('duracionServicio');
-        const selectedOption = servicioSelect.options[servicioSelect.selectedIndex];
-        
-        if (selectedOption.value && selectedOption.getAttribute('data-duracion')) {
-            const duracion = selectedOption.getAttribute('data-duracion');
-            duracionInput.value = duracion + " minutos";
-        } else {
-            duracionInput.value = "No disponible";
-        }
+  }
+
+  const servicioSelect = document.getElementById('servicioId');
+  const duracionServicio = document.getElementById('duracionServicio');
+  if (servicioSelect && duracionServicio) {
+    servicioSelect.addEventListener('change', function () {
+      const opt = this.options[this.selectedIndex];
+      const dur = opt && opt.getAttribute('data-duracion');
+      duracionServicio.value = (this.value && dur) ? `${dur} minutos` : 'No disponible';
     });
+  }
 </script>
 </body>
 </html>
