@@ -20,7 +20,8 @@ public class ReservaPacienteForm {
 
     @NotBlank(message = "Los apellidos son obligatorios.")
     @Size(min = 2, max = 60, message = "Los apellidos deben tener entre 2 y 60 caracteres.")
-    @ValidName(message = "Ingrese apellidos validos: solo letras, hasta 4 palabras, sin repetir y cada palabra con vocal.")
+    @ValidName(allowRepeatedWords = true,
+            message = "Ingrese apellidos validos: solo letras, hasta 4 palabras y cada palabra con vocal (se permiten apellidos iguales).")
     private String apellidosPaciente;
 
     // Telefono Colombia: se valida con ColombiaPhone para soportar prefijo +57 y formatos comunes
@@ -43,6 +44,9 @@ public class ReservaPacienteForm {
 
     @NotNull(message = "La hora de la reserva es obligatoria.")
     private LocalTime horaReserva;
+
+    // Controla si se deben actualizar los datos del paciente existente
+    private Boolean actualizarDatosPaciente = Boolean.FALSE;
 
     // Getters & Setters
 
@@ -69,4 +73,7 @@ public class ReservaPacienteForm {
 
     public LocalTime getHoraReserva() { return horaReserva; }
     public void setHoraReserva(LocalTime horaReserva) { this.horaReserva = horaReserva; }
+
+    public Boolean getActualizarDatosPaciente() { return actualizarDatosPaciente; }
+    public void setActualizarDatosPaciente(Boolean actualizarDatosPaciente) { this.actualizarDatosPaciente = actualizarDatosPaciente; }
 }

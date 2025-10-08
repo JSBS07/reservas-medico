@@ -52,4 +52,10 @@
     </div>
 </main>
 </body>
+<script>
+    // Limpiar borrador al confirmar reserva exitosamente
+    try { localStorage.removeItem('reservaFormDraft'); } catch(_) {}
+    // Opcional: redirigir a nueva reserva con formulario limpio al volver
+    // history.replaceState && history.replaceState(null, '', location.pathname);
+</script>
 </html>

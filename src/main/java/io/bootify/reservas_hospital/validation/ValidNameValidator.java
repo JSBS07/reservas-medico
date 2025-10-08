@@ -17,6 +17,9 @@ public class ValidNameValidator implements ConstraintValidator<ValidName, String
     private int maxWords;
     private int maxRepeatedChars;
     private java.util.Set<String> blockedWords = new java.util.HashSet<>();
+    private boolean allowRepeatedWords;
+
+    private static final Pattern LAUGH_PATTERN = Pattern.compile("(?i)(ja|je|ji|jo|ju){2,}");
 
     @Override
     public void initialize(ValidName constraintAnnotation) {
@@ -26,6 +29,7 @@ public class ValidNameValidator implements ConstraintValidator<ValidName, String
         this.maxWordLength = constraintAnnotation.maxWordLength();
         this.maxWords = constraintAnnotation.maxWords();
         this.maxRepeatedChars = constraintAnnotation.maxRepeatedChars();
+        this.allowRepeatedWords = constraintAnnotation.allowRepeatedWords();
         for (String word : constraintAnnotation.blockedWords()) {
             if (word != null) {
                 String cleaned = normalizeForComparison(word);
@@ -57,8 +61,10 @@ public class ValidNameValidator implements ConstraintValidator<ValidName, String
                 return false;
             }
             String comparable = normalizeForComparison(word);
-            if (!seen.add(comparable)) {
-                return false;
+            if (!allowRepeatedWords) {
+                if (!seen.add(comparable)) {
+                    return false; // palabra repetida (no permitido)
+                }
             }
             if (blockedWords.contains(comparable)) {
                 return false;
@@ -73,6 +79,9 @@ public class ValidNameValidator implements ConstraintValidator<ValidName, String
                 return false;
             }
             if (hasExcessiveRepeatedChars(word)) {
+                return false;
+            }
+            if (isLaughLike(word)) { // evita "jaja", "jeje", etc.
                 return false;
             }
         }
@@ -104,5 +113,9 @@ public class ValidNameValidator implements ConstraintValidator<ValidName, String
             }
         }
         return false;
+    }
+
+    private boolean isLaughLike(String word) {
+        return LAUGH_PATTERN.matcher(word).matches();
     }
 }

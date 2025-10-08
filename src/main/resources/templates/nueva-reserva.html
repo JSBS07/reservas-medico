@@ -133,6 +133,14 @@
                                  th:errors="*{fechaNacimientoPaciente}">Error</div>
                         </div>
                     </div>
+
+                    <div class="form-control-group" style="margin-top: 0.5rem;">
+                        <label class="checkbox">
+                            <input type="checkbox" th:field="*{actualizarDatosPaciente}">
+                            <span>Actualizar datos del paciente si ya existe por teléfono</span>
+                        </label>
+                        <small class="form-help">Si está marcado y el teléfono ya existe, se reemplazarán nombres, apellidos y fecha de nacimiento con los ingresados.</small>
+                    </div>
                 </div>
 
                 <div class="form-section">
@@ -224,7 +232,7 @@
     </div>
 </main>
 
-<script>
+<script th:inline="javascript">
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -234,6 +242,13 @@
     const fechaReservaInput = document.getElementById('fechaReserva');
     if (fechaReservaInput) {
         fechaReservaInput.min = todayStr;
+        const maxDate = new Date(today);
+        maxDate.setMonth(maxDate.getMonth() + 2);
+        const maxY = maxDate.getFullYear();
+        const maxM = String(maxDate.getMonth() + 1).padStart(2, '0');
+        const maxD = String(maxDate.getDate()).padStart(2, '0');
+        const maxStr = `${maxY}-${maxM}-${maxD}`;
+        fechaReservaInput.max = maxStr;
     }
 
     const fechaNacInput = document.getElementById('fechaNacimientoPaciente');
@@ -268,6 +283,239 @@
         servicioSelect.addEventListener('change', updateDuracion);
         updateDuracion();
     }
+
+    // ===== Validaciones en tiempo real =====
+    const nombresInput = document.getElementById('nombresPaciente');
+    const apellidosInput = document.getElementById('apellidosPaciente');
+    const telefonoInput = document.getElementById('telefonoPaciente');
+    const horaInput = document.getElementById('horaReserva');
+
+    const festivosConfig = /*[[${@environment.getProperty('reservas.festivos') ?: ''}]]*/ '';
+    const festivos = (festivosConfig || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+    const festivosFijos = new Set(festivos.filter(s => /^\d{4}-\d{2}-\d{2}$/.test(s)));
+    const festivosRecurrentes = new Set(festivos.filter(s => /^\d{2}-\d{2}$/.test(s)));
+
+    const PERMITTED_WORD = /^[A-Za-zÁÉÍÓÚáéíóúÑñ'\-]+$/;
+    const VOWEL = /[AEIOUÁÉÍÓÚaeiouáéíóú]/;
+    const LAUGH = /(ja|je|ji|jo|ju){2,}/i;
+    const BLOCKED = new Set(['paciente','anonimo','anónimo','test','prueba','jaja','jeje','jiji','jojo','jajaja','jejeje','jijiji','xd','asdf','qwerty']);
+
+    function normalizeSpaces(s){ return (s || '').trim().replace(/\s+/g, ' '); }
+    function removeDiacritics(s){ return s.normalize('NFD').replace(/\p{M}/gu,''); }
+    function cmpToken(s){ return removeDiacritics(s).toLowerCase().replace(/'/g,''); }
+
+    function hasExcessiveRepeats(word, max=3){
+        let count = 1;
+        for (let i=1;i<word.length;i++){
+            if (word[i].toLowerCase() === word[i-1].toLowerCase()){
+                if (++count>max) return true;
+            } else count=1;
+        }
+        return false;
+    }
+
+    function validateNombre(value, {allowRepeatedWords=false}={}){
+        const errors = [];
+        const s = normalizeSpaces(value);
+        if (!s) return errors; // requerido lo maneja servidor/HTML
+        if (s.length < 2 || s.length > 60) errors.push('Debe tener entre 2 y 60 caracteres.');
+        const words = s.split(' ');
+        if (words.length > 4) errors.push('Maximo 4 palabras.');
+        const seen = new Set();
+        for (const w of words){
+            if (!w) { errors.push('Formato invalido.'); continue; }
+            const cmp = cmpToken(w);
+            if (!allowRepeatedWords && seen.has(cmp)) errors.push('No repitas palabras.');
+            seen.add(cmp);
+            if (BLOCKED.has(cmp)) errors.push('Palabra no permitida.');
+            if (w.length < 2 || w.length > 30) errors.push('Cada palabra entre 2 y 30 caracteres.');
+            if (!PERMITTED_WORD.test(w)) errors.push('Solo letras, guion o apostrofe.');
+            if (!VOWEL.test(w)) errors.push('Cada palabra debe contener una vocal.');
+            if (LAUGH.test(w)) errors.push('Evita cadenas tipo "jaja".');
+            if (hasExcessiveRepeats(w)) errors.push('Evita caracteres repetidos en exceso.');
+        }
+        return [...new Set(errors)];
+    }
+
+    function validateTelefono(value){
+        const s = (value || '').replace(/[\s\-()]/g,'');
+        let digits = s.startsWith('+57') ? s.slice(3) : s;
+        if (/^3\d{9}$/.test(digits)) return [];
+        if (/^60[1-8]\d{7}$/.test(digits)) return [];
+        return ['Ingrese un telefono colombiano valido (+57 opcional).'];
+    }
+
+    function isWeekend(date){ const d=date.getDay(); return d===0 || d===6; }
+    function toYMD(date){ const y=date.getFullYear(); const m=String(date.getMonth()+1).padStart(2,'0'); const d=String(date.getDate()).padStart(2,'0'); return `${y}-${m}-${d}`; }
+    function isHoliday(date){
+        const ymd = toYMD(date);
+        const md = ymd.slice(5);
+        return festivosFijos.has(ymd) || festivosRecurrentes.has(md);
+    }
+
+    function setFieldError(inputEl, msg){
+        const group = inputEl.closest('.form-control-group') || inputEl.parentElement;
+        let err = group.querySelector('.client-error');
+        if (!err){
+            err = document.createElement('div');
+            err.className = 'invalid-feedback client-error';
+            group.appendChild(err);
+        }
+        if (msg){
+            inputEl.classList.add('is-invalid');
+            err.textContent = msg;
+            err.style.display = '';
+        } else {
+            inputEl.classList.remove('is-invalid');
+            err.textContent = '';
+            err.style.display = 'none';
+        }
+    }
+
+    function validateAll(){
+        let firstInvalid = null;
+
+        // Nombres
+        if (nombresInput){
+            const errs = validateNombre(nombresInput.value, {allowRepeatedWords:false});
+            setFieldError(nombresInput, errs[0]);
+            if (errs.length && !firstInvalid) firstInvalid = nombresInput;
+        }
+
+        // Apellidos
+        if (apellidosInput){
+            const errs = validateNombre(apellidosInput.value, {allowRepeatedWords:true});
+            setFieldError(apellidosInput, errs[0]);
+            if (errs.length && !firstInvalid) firstInvalid = apellidosInput;
+        }
+
+        // Nombres y apellidos no iguales
+        if (nombresInput && apellidosInput){
+            const a = normalizeSpaces(nombresInput.value).toLowerCase();
+            const b = normalizeSpaces(apellidosInput.value).toLowerCase();
+            if (a && b && a === b){
+                setFieldError(apellidosInput, 'Nombres y apellidos no pueden ser iguales.');
+                if (!firstInvalid) firstInvalid = apellidosInput;
+            }
+        }
+
+        // Telefono
+        if (telefonoInput){
+            const errs = validateTelefono(telefonoInput.value);
+            setFieldError(telefonoInput, errs[0]);
+            if (errs.length && !firstInvalid) firstInvalid = telefonoInput;
+        }
+
+        // Fecha de nacimiento (15..95 años)
+        if (fechaNacInput){
+            const val = fechaNacInput.value;
+            let msg = '';
+            if (val){
+                const d = new Date(val+'T00:00:00');
+                const now = new Date();
+                const y = now.getFullYear();
+                const minDob = new Date(y - 95, now.getMonth(), now.getDate());
+                const maxDob = new Date(y - 15, now.getMonth(), now.getDate());
+                if (d < minDob || d > maxDob) msg = 'Edad permitida: entre 15 y 95 años.';
+            }
+            setFieldError(fechaNacInput, msg || null);
+            if (msg && !firstInvalid) firstInvalid = fechaNacInput;
+        }
+
+        // Fecha de reserva: fin de semana/festivo
+        if (fechaReservaInput){
+            const val = fechaReservaInput.value;
+            let msg = '';
+            if (val){
+                const d = new Date(val+'T00:00:00');
+                if (isWeekend(d)) msg = 'No se pueden agendar citas los fines de semana.';
+                else if (isHoliday(d)) msg = 'No se pueden agendar citas en días festivos.';
+            }
+            setFieldError(fechaReservaInput, msg || null);
+            if (msg && !firstInvalid) firstInvalid = fechaReservaInput;
+        }
+
+        // Hora de reserva: 07:00..17:00
+        if (horaInput){
+            const val = horaInput.value;
+            let msg = '';
+            if (val){
+                const [h,m] = val.split(':').map(Number);
+                const t = h + (m/60);
+                if (t < 7 || t > 17) msg = 'La hora debe estar entre 7:00 y 17:00.';
+            }
+            setFieldError(horaInput, msg || null);
+            if (msg && !firstInvalid) firstInvalid = horaInput;
+        }
+
+        return firstInvalid;
+    }
+
+    // Bind events
+    [nombresInput, apellidosInput, telefonoInput, fechaNacInput, fechaReservaInput, horaInput]
+        .filter(Boolean)
+        .forEach(el => el.addEventListener('input', () => validateAll()));
+
+    // Validate on submit
+    const form = document.querySelector('form[th\\:action], form[action*="/reservas/crear"]') || document.querySelector('form');
+    if (form){
+        form.addEventListener('submit', (e) => {
+            const firstInvalid = validateAll();
+            if (firstInvalid){
+                e.preventDefault();
+                firstInvalid.focus();
+            }
+        });
+    }
+
+    // ===== Guardado automático (no perder datos) =====
+    const DRAFT_KEY = 'reservaFormDraft';
+    function readDraft(){
+        try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch(_) { return {}; }
+    }
+    function writeDraft(obj){
+        try { localStorage.setItem(DRAFT_KEY, JSON.stringify(obj)); } catch(_) {}
+    }
+    function collect(){
+        return {
+            nombresPaciente: nombresInput?.value || '',
+            apellidosPaciente: apellidosInput?.value || '',
+            telefonoPaciente: telefonoInput?.value || '',
+            fechaNacimientoPaciente: fechaNacInput?.value || '',
+            doctorId: document.getElementById('doctorId')?.value || '',
+            servicioId: servicioSelect?.value || '',
+            fechaReserva: fechaReservaInput?.value || '',
+            horaReserva: horaInput?.value || '',
+            actualizarDatosPaciente: (document.getElementById('actualizarDatosPaciente')?.checked) || false,
+        };
+    }
+    function restore(){
+        const d = readDraft();
+        const setIfEmpty = (el, val) => { if (el && !el.value) el.value = val || ''; };
+        setIfEmpty(nombresInput, d.nombresPaciente);
+        setIfEmpty(apellidosInput, d.apellidosPaciente);
+        setIfEmpty(telefonoInput, d.telefonoPaciente);
+        setIfEmpty(fechaNacInput, d.fechaNacimientoPaciente);
+        const doctorSelectEl = document.getElementById('doctorId');
+        if (doctorSelectEl && !doctorSelectEl.value && d.doctorId){ doctorSelectEl.value = String(d.doctorId); doctorSelectEl.dispatchEvent(new Event('change')); }
+        if (servicioSelect && !servicioSelect.value && d.servicioId){ servicioSelect.value = String(d.servicioId); servicioSelect.dispatchEvent(new Event('change')); }
+        setIfEmpty(fechaReservaInput, d.fechaReserva);
+        setIfEmpty(horaInput, d.horaReserva);
+        const ck = document.getElementById('actualizarDatosPaciente');
+        if (ck && typeof d.actualizarDatosPaciente === 'boolean') ck.checked = d.actualizarDatosPaciente;
+    }
+    function startAutosave(){
+        const fields = [nombresInput, apellidosInput, telefonoInput, fechaNacInput, fechaReservaInput, horaInput, document.getElementById('doctorId'), servicioSelect, document.getElementById('actualizarDatosPaciente')].filter(Boolean);
+        fields.forEach(el => el.addEventListener('input', () => writeDraft(collect())));
+        fields.forEach(el => el.addEventListener('change', () => writeDraft(collect())));
+        // guarda inmediatamente el estado inicial
+        writeDraft(collect());
+    }
+    restore();
+    startAutosave();
 </script>
 </body>
 </html>

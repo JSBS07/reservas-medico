@@ -93,6 +93,10 @@ public class ReservaController {
             if (fechaReserva.isBefore(today)) {
                 br.rejectValue("fechaReserva", "fecha.pasada", "La fecha debe ser hoy o futura.");
             }
+            // No permitir citas a mas de 2 meses desde hoy
+            if (!br.hasFieldErrors("fechaReserva") && fechaReserva.isAfter(today.plusMonths(2))) {
+                br.rejectValue("fechaReserva", "fecha.maxMeses", "No se pueden agendar citas con mas de 2 meses de anticipacion.");
+            }
             if (!br.hasFieldErrors("fechaReserva") && businessCalendarService.isWeekend(fechaReserva)) {
                 br.rejectValue("fechaReserva", "fecha.finDeSemana", "No se pueden agendar citas los fines de semana.");
             }
@@ -161,6 +165,12 @@ public class ReservaController {
             paciente.setNombres(form.getNombresPaciente().trim());
             paciente.setApellidos(form.getApellidosPaciente().trim());
             paciente.setTelefono(form.getTelefonoPaciente().trim());
+            paciente.setFechaNacimiento(form.getFechaNacimientoPaciente());
+            paciente = pacienteRepository.save(paciente);
+        } else if (Boolean.TRUE.equals(form.getActualizarDatosPaciente())) {
+            // Solo actualizar datos si el usuario lo confirma
+            paciente.setNombres(form.getNombresPaciente().trim());
+            paciente.setApellidos(form.getApellidosPaciente().trim());
             paciente.setFechaNacimiento(form.getFechaNacimientoPaciente());
             paciente = pacienteRepository.save(paciente);
         }

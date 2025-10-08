@@ -31,7 +31,13 @@ public @interface ValidName {
 
     int maxWords() default 4;
 
-    String[] blockedWords() default {"paciente", "anonimo", "test", "prueba"};
+    String[] blockedWords() default {
+            "paciente", "anonimo", "anónimo", "test", "prueba",
+            "jaja", "jeje", "jiji", "jojo", "jajaja", "jejeje", "jijiji", "xd", "asdf", "qwerty"
+    };
 
     int maxRepeatedChars() default 3;
+
+    // Permitir palabras repetidas dentro del nombre completo (p.ej. dos apellidos iguales)
+    boolean allowRepeatedWords() default false;
 }
