@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - MediCitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #111827; min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:2rem; }
+        .card { width:100%; max-width: 520px; background: rgba(255,255,255,0.96); border-radius: 16px; box-shadow: 0 30px 60px -20px rgba(15,23,42,0.35); padding: 2rem; }
+        h1 { font-size: 1.75rem; margin: 0 0 0.25rem; }
+        p { color:#475569; margin: 0 0 1.25rem; }
+        .input-field { margin-bottom: 1rem; }
+        .input-field label { display:block; font-weight:600; margin-bottom: 0.35rem; color:#334155; }
+        .input-box { display:flex; align-items:center; gap:0.5rem; border:1px solid #cbd5e1; border-radius: 12px; padding: 0.65rem 0.8rem; background:#fff; }
+        .input-box i { color:#475569; }
+        .input-box input { border:0; outline:0; width:100%; font-size:1rem; color:#0f172a; }
+        .help { font-size: 0.85rem; color:#64748b; margin-top:0.25rem; }
+        .invalid-feedback { color:#b91c1c; font-size:0.86rem; margin-top: 0.35rem; }
+        .actions { display:flex; justify-content:space-between; align-items:center; margin-top: 1rem; }
+        .btn { background:#2563eb; color:#fff; border:0; padding: 0.75rem 1rem; border-radius: 12px; cursor:pointer; font-weight:600; }
+        .btn.secondary { background: transparent; color:#2563eb; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const email = document.getElementById('email');
+            const pass = document.getElementById('password');
+            const conf = document.getElementById('confirmPassword');
+            const setErr = (el, msg) => {
+                let fb = el.parentElement.parentElement.querySelector('.client-err');
+                if (!fb) { fb = document.createElement('div'); fb.className='invalid-feedback client-err'; el.parentElement.parentElement.appendChild(fb); }
+                fb.textContent = msg || '';
+                if (msg) el.classList.add('is-invalid'); else el.classList.remove('is-invalid');
+            };
+            const emailOk = (v) => /^[A-Za-z0-9._%+-]+@(gmail\.com|outlook\.co)$/i.test(v);
+            function validate(){
+                let first = null;
+                if (email){ const ok = emailOk(email.value); setErr(email, ok? '' : 'Debe ser @gmail.com o @outlook.co'); if(!ok) first = first||email; }
+                if (pass){ const ok = pass.value.length>0 && pass.value.length<=15; setErr(pass, ok? '' : 'Maximo 15 caracteres'); if(!ok) first = first||pass; }
+                if (conf){ const ok = conf.value === pass.value; setErr(conf, ok? '' : 'No coincide'); if(!ok) first = first||conf; }
+                return first;
+            }
+            [email, pass, conf].forEach(el => el && el.addEventListener('input', validate));
+            const form = document.getElementById('regForm');
+            if (form){ form.addEventListener('submit', (e)=>{ const f = validate(); if (f){ e.preventDefault(); f.focus(); } }); }
+
+            // Rango permitido para fecha de nacimiento (15..95)
+            const dob = document.getElementById('fechaNacimientoPaciente');
+            if (dob){
+                const now = new Date();
+                const y = now.getFullYear();
+                const toStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const min = new Date(y-95, now.getMonth(), now.getDate());
+                const max = new Date(y-15, now.getMonth(), now.getDate());
+                dob.min = toStr(min);
+                dob.max = toStr(max);
+            }
+        });
+    </script>
+    </head>
+<body>
+    <div class="card">
+        <h1>Crear cuenta</h1>
+        <p>Regístrate como paciente con tu correo y una contraseña (máx. 15 caracteres).</p>
+        <form id="regForm" th:action="@{/registro}" th:object="${form}" method="post">
+            <div class="input-field">
+                <label for="email">Correo electrónico</label>
+                <div class="input-box">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" th:field="*{email}" placeholder="tu@correo" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</div>
+                <div class="help">Solo @gmail.com o @outlook.co</div>
+            </div>
+            <div class="input-field">
+                <label for="password">Contraseña</label>
+                <div class="input-box">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" th:field="*{password}" placeholder="Máx. 15 caracteres" maxlength="15" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</div>
+                <div class="help">Se permite letras, números y símbolos. Límite 15.</div>
+            </div>
+            <div class="input-field">
+                <label for="confirmPassword">Confirmar contraseña</label>
+                <div class="input-box">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirmPassword" th:field="*{confirmPassword}" placeholder="Repite la contraseña" maxlength="15" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Error</div>
+            </div>
+            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #e2e8f0;">
+            <h2 style="font-size: 1.2rem; margin-bottom: 0.75rem;">Datos del paciente</h2>
+
+            <div class="input-field">
+                <label for="nombresPaciente">Nombres</label>
+                <div class="input-box">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="nombresPaciente" th:field="*{nombresPaciente}" placeholder="Ej: Juan Carlos" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombresPaciente')}" th:errors="*{nombresPaciente}">Error</div>
+            </div>
+            <div class="input-field">
+                <label for="apellidosPaciente">Apellidos</label>
+                <div class="input-box">
+                    <i class="fas fa-user-tag"></i>
+                    <input type="text" id="apellidosPaciente" th:field="*{apellidosPaciente}" placeholder="Ej: Perez Perez" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('apellidosPaciente')}" th:errors="*{apellidosPaciente}">Error</div>
+            </div>
+            <div class="input-field">
+                <label for="telefonoPaciente">Teléfono</label>
+                <div class="input-box">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" id="telefonoPaciente" th:field="*{telefonoPaciente}" placeholder="+57 300 123 4567" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('telefonoPaciente')}" th:errors="*{telefonoPaciente}">Error</div>
+            </div>
+            <div class="input-field">
+                <label for="fechaNacimientoPaciente">Fecha de nacimiento</label>
+                <div class="input-box">
+                    <i class="fas fa-cake-candles"></i>
+                    <input type="date" id="fechaNacimientoPaciente" th:field="*{fechaNacimientoPaciente}" required>
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('fechaNacimientoPaciente')}" th:errors="*{fechaNacimientoPaciente}">Error</div>
+                <div class="help">Edad entre 15 y 95 años.</div>
+            </div>
+
+            <div class="actions">
+                <a class="btn secondary" th:href="@{/login}"><i class="fas fa-arrow-left"></i> Volver</a>
+                <button class="btn" type="submit"><i class="fas fa-user-plus"></i> Registrarme</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

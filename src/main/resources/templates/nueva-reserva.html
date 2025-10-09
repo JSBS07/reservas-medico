@@ -92,6 +92,7 @@
                                    th:field="*{nombresPaciente}"
                                    pattern="^(?=.{2,60}$)(?!.*\\s{2})(?=.*[AEIOUaeiou\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1])[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+(?:\\s[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+){0,3}$"
                                    autocomplete="name"
+                                   th:readonly="${usuarioActual != null and usuarioActual.paciente != null}"
                                    th:classappend="${#fields.hasErrors('nombresPaciente')} ? ' is-invalid'">
                             <div class="invalid-feedback"
                                  th:if="${#fields.hasErrors('nombresPaciente')}"
@@ -103,6 +104,7 @@
                                    th:field="*{apellidosPaciente}"
                                    pattern="^(?=.{2,60}$)(?!.*\\s{2})(?=.*[AEIOUaeiou\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1])[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+(?:\\s[A-Za-z\\u00C1\\u00C9\\u00CD\\u00D3\\u00DA\\u00E1\\u00E9\\u00ED\\u00F3\\u00FA\\u00D1\\u00F1'\\-]+){0,3}$"
                                    autocomplete="family-name"
+                                   th:readonly="${usuarioActual != null and usuarioActual.paciente != null}"
                                    th:classappend="${#fields.hasErrors('apellidosPaciente')} ? ' is-invalid'">
                             <div class="invalid-feedback"
                                  th:if="${#fields.hasErrors('apellidosPaciente')}"
@@ -126,7 +128,9 @@
                         <div class="form-control-group">
                             <label for="fechaNacimientoPaciente">Fecha de nacimiento *</label>
                             <input type="date" id="fechaNacimientoPaciente" class="form-input"
-                                   th:field="*{fechaNacimientoPaciente}"
+                                   name="fechaNacimientoPaciente"
+                                   th:value="${form.fechaNacimientoPaciente != null ? #temporals.format(form.fechaNacimientoPaciente, 'yyyy-MM-dd') : (usuarioActual != null and usuarioActual.paciente != null and usuarioActual.paciente.fechaNacimiento != null ? #temporals.format(usuarioActual.paciente.fechaNacimiento, 'yyyy-MM-dd') : '')}"
+                                   th:readonly="${usuarioActual != null and usuarioActual.paciente != null and usuarioActual.paciente.fechaNacimiento != null}"
                                    th:classappend="${#fields.hasErrors('fechaNacimientoPaciente')} ? ' is-invalid'">
                             <div class="invalid-feedback"
                                  th:if="${#fields.hasErrors('fechaNacimientoPaciente')}"
@@ -134,12 +138,12 @@
                         </div>
                     </div>
 
-                    <div class="form-control-group" style="margin-top: 0.5rem;">
+                    <div class="form-control-group" style="margin-top: 0.5rem;" th:if="${usuarioActual != null and usuarioActual.paciente != null}">
                         <label class="checkbox">
                             <input type="checkbox" th:field="*{actualizarDatosPaciente}">
-                            <span>Actualizar datos del paciente si ya existe por teléfono</span>
+                            <span>Actualizar mi telefono</span>
                         </label>
-                        <small class="form-help">Si está marcado y el teléfono ya existe, se reemplazarán nombres, apellidos y fecha de nacimiento con los ingresados.</small>
+                        <small class="form-help">Actualiza los datos del paciente con lo que ingreses aquí.</small>
                     </div>
                 </div>
 

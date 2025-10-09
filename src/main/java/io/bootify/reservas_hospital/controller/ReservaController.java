@@ -9,6 +9,7 @@ import io.bootify.reservas_hospital.dto.ReservaPacienteForm;
 import io.bootify.reservas_hospital.repos.DoctorRepository;
 import io.bootify.reservas_hospital.repos.PacienteRepository;
 import io.bootify.reservas_hospital.repos.ReservaRepository;
+import io.bootify.reservas_hospital.repos.UsuarioRepository;
 import io.bootify.reservas_hospital.repos.ServiciosMedicoRepository;
 import io.bootify.reservas_hospital.service.AuthService;
 import io.bootify.reservas_hospital.service.BusinessCalendarService;
@@ -51,6 +52,9 @@ public class ReservaController {
     @Autowired
     private BusinessCalendarService businessCalendarService;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @GetMapping("/nueva")
     @PreAuthorize("hasAuthority('PACIENTE')")
     public String mostrarFormularioReserva(Model model) {
@@ -59,7 +63,15 @@ public class ReservaController {
             if (usuarioActual == null) {
                 return "redirect:/login?error=usuario_no_autenticado";
             }
-            model.addAttribute("form", new ReservaPacienteForm());
+            ReservaPacienteForm form = new ReservaPacienteForm();
+            if (usuarioActual.getPaciente() != null) {
+                // Prefill datos del paciente desde el usuario
+                form.setNombresPaciente(usuarioActual.getPaciente().getNombres());
+                form.setApellidosPaciente(usuarioActual.getPaciente().getApellidos());
+                form.setTelefonoPaciente(usuarioActual.getPaciente().getTelefono());
+                form.setFechaNacimientoPaciente(usuarioActual.getPaciente().getFechaNacimiento());
+            }
+            model.addAttribute("form", form);
             model.addAttribute("doctores", doctorRepository.findAll());
             model.addAttribute("servicios", serviciosMedicoRepository.findAll());
             model.addAttribute("usuarioActual", usuarioActual);
@@ -159,18 +171,36 @@ public class ReservaController {
             }
         }
 
-        Paciente paciente = pacienteRepository.findByTelefono(form.getTelefonoPaciente()).orElse(null);
+        Paciente paciente = usuario.getPaciente();
         if (paciente == null) {
-            paciente = new Paciente();
-            paciente.setNombres(form.getNombresPaciente().trim());
-            paciente.setApellidos(form.getApellidosPaciente().trim());
-            paciente.setTelefono(form.getTelefonoPaciente().trim());
-            paciente.setFechaNacimiento(form.getFechaNacimientoPaciente());
-            paciente = pacienteRepository.save(paciente);
-        } else if (Boolean.TRUE.equals(form.getActualizarDatosPaciente())) {
-            // Solo actualizar datos si el usuario lo confirma
-            paciente.setNombres(form.getNombresPaciente().trim());
-            paciente.setApellidos(form.getApellidosPaciente().trim());
+            // Intentar reutilizar un paciente existente por teléfono
+            paciente = pacienteRepository.findByTelefono(form.getTelefonoPaciente()).orElse(null);
+            if (paciente == null) {
+                // Crear un nuevo paciente con TODOS los datos ingresados
+                paciente = new Paciente();
+                paciente.setNombres(form.getNombresPaciente().trim());
+                paciente.setApellidos(form.getApellidosPaciente().trim());
+                paciente.setTelefono(form.getTelefonoPaciente().trim());
+                paciente.setFechaNacimiento(form.getFechaNacimientoPaciente());
+                paciente = pacienteRepository.save(paciente);
+            } else if (Boolean.TRUE.equals(form.getActualizarDatosPaciente())) {
+                // Solo permitir actualizar teléfono en paciente existente
+                paciente.setTelefono(form.getTelefonoPaciente().trim());
+                paciente = pacienteRepository.save(paciente);
+            }
+            // Enlazar el paciente al usuario si no estaba vinculado
+            usuario.setPaciente(paciente);
+            usuarioRepository.save(usuario);
+        } else {
+            if (Boolean.TRUE.equals(form.getActualizarDatosPaciente())) {
+                // Usuario ya tiene paciente: solo permitir actualizar el teléfono
+                paciente.setTelefono(form.getTelefonoPaciente().trim());
+                paciente = pacienteRepository.save(paciente);
+            }
+        }
+
+        // Si el paciente existe pero no tiene fecha de nacimiento, permitir establecerla UNA vez
+        if (paciente != null && paciente.getFechaNacimiento() == null && form.getFechaNacimientoPaciente() != null) {
             paciente.setFechaNacimiento(form.getFechaNacimientoPaciente());
             paciente = pacienteRepository.save(paciente);
         }

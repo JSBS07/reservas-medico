@@ -1,22 +1,107 @@
 package io.bootify.reservas_hospital.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import java.util.regex.Pattern;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import io.bootify.reservas_hospital.domain.Usuario;
+import io.bootify.reservas_hospital.domain.Paciente;
+import io.bootify.reservas_hospital.repos.PacienteRepository;
+import io.bootify.reservas_hospital.repos.UsuarioRepository;
 import io.bootify.reservas_hospital.service.AuthService;
+import io.bootify.reservas_hospital.dto.RegistroForm;
+import jakarta.validation.Valid;
 
 @Controller
 public class AuthController {
 
     private final AuthService authService;
+    private final UsuarioRepository usuarioRepository;
+    private final PacienteRepository pacienteRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AuthService authService) {
+    private static final Pattern EMAIL_ALLOWED = Pattern.compile("^[A-Za-z0-9._%+-]+@(gmail\\.com|outlook\\.co)$", Pattern.CASE_INSENSITIVE);
+
+    public AuthController(AuthService authService, UsuarioRepository usuarioRepository, PacienteRepository pacienteRepository, PasswordEncoder passwordEncoder) {
         this.authService = authService;
+        this.usuarioRepository = usuarioRepository;
+        this.pacienteRepository = pacienteRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    @GetMapping("/registro")
+    public String registro(Model model) {
+        model.addAttribute("form", new RegistroForm());
+        return "registro";
+    }
+
+    @PostMapping("/registro")
+    public String procesarRegistro(@Valid @ModelAttribute("form") RegistroForm form, BindingResult br, Model model) {
+        // Validación de dominio permitido
+        if (form.getEmail() != null && !EMAIL_ALLOWED.matcher(form.getEmail()).matches()) {
+            br.rejectValue("email", "email.dominio", "El correo debe ser @gmail.com o @outlook.co");
+        }
+        // Unicidad
+        if (form.getEmail() != null && usuarioRepository.existsByEmail(form.getEmail())) {
+            br.rejectValue("email", "email.existe", "Este correo ya esta registrado");
+        }
+        // Longitud de contraseña (max 15)
+        if (form.getPassword() != null && form.getPassword().length() > 15) {
+            br.rejectValue("password", "password.longitud", "La contrasena no puede exceder 15 caracteres");
+        }
+        // Confirmación
+        if (form.getPassword() != null && form.getConfirmPassword() != null && !form.getPassword().equals(form.getConfirmPassword())) {
+            br.rejectValue("confirmPassword", "password.coincide", "Las contrasenas no coinciden");
+        }
+
+        // Reglas adicionales de datos de paciente: nombres != apellidos, edad 15..95
+        if (form.getNombresPaciente() != null && form.getApellidosPaciente() != null
+                && form.getNombresPaciente().trim().equalsIgnoreCase(form.getApellidosPaciente().trim())) {
+            br.rejectValue("apellidosPaciente", "iguales", "Nombres y apellidos no pueden ser iguales.");
+        }
+        if (form.getFechaNacimientoPaciente() != null) {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            int edad = java.time.Period.between(form.getFechaNacimientoPaciente(), today).getYears();
+            if (edad < 15) {
+                br.rejectValue("fechaNacimientoPaciente", "edad.min", "Edad minima 15.");
+            }
+            if (edad > 95) {
+                br.rejectValue("fechaNacimientoPaciente", "edad.max", "Edad maxima 95.");
+            }
+        }
+
+        if (br.hasErrors()) {
+            return "registro";
+        }
+
+        // Crear paciente y vincular al usuario
+        Paciente paciente = new Paciente();
+        paciente.setNombres(form.getNombresPaciente().trim());
+        paciente.setApellidos(form.getApellidosPaciente().trim());
+        paciente.setTelefono(form.getTelefonoPaciente().trim());
+        paciente.setFechaNacimiento(form.getFechaNacimientoPaciente());
+        paciente = pacienteRepository.save(paciente);
+
+        Usuario user = new Usuario();
+        user.setEmail(form.getEmail());
+        user.setPassword(passwordEncoder.encode(form.getPassword()));
+        user.setRol("PACIENTE");
+        user.setActivo(true);
+        user.setPaciente(paciente);
+        usuarioRepository.save(user);
+
+        return "redirect:/login?registered=true";
     }
 
     @GetMapping("/dashboard")

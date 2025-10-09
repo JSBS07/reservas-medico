@@ -18,7 +18,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // Público - PERMITE ACCESO ANÓNIMO A ESTAS RUTAS
-                .requestMatchers("/", "/index", "/home", "/login", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                .requestMatchers("/", "/index", "/home", "/login", "/registro", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 
                 // Rutas de paciente
                 .requestMatchers("/reservas/nueva", "/reservas/crear", "/reservas/exito", "/reservas/listar", "/reservas/cancelar/**").hasAuthority("PACIENTE")

@@ -365,6 +365,10 @@
                     <i class="fas fa-circle-check"></i>
                     Cierre de sesion exitoso.
                 </div>
+                <div th:if="${param.registered}" class="alert alert-success">
+                    <i class="fas fa-user-check"></i>
+                    Registro exitoso. Ahora puedes iniciar sesion.
+                </div>
                 <div th:if="${param.error}" class="alert alert-danger">
                     <i class="fas fa-circle-exclamation"></i>
                     Verifica tu correo o contrasena e intenta de nuevo.
@@ -388,8 +392,8 @@
                     <div class="form-actions">
                         <button type="submit">Ingresar</button>
                         <div class="support-links">
-                            <span>Necesitas ayuda?</span>
-                            <a href="mailto:soporte@medicitas.com">Contactar soporte</a>
+                            <span>¿Aun no tienes cuenta?</span>
+                            <a th:href="@{/registro}">Registrarse</a>
                         </div>
                     </div>
                 </form>
