@@ -60,20 +60,5 @@ public class DoctorController {
         return "redirect:/doctor/dashboard";
     }
 
-    @PostMapping("/reservas/{id}/eliminar")
-    @PreAuthorize("hasAuthority('DOCTOR')")
-    public String eliminarReserva(@PathVariable Long id) {
-        Doctor doctorActual = authService.getDoctorActual();
-        
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
-        
-        // Verificar que la reserva pertenezca al doctor actual
-        if (!reserva.getDoctor().getId().equals(doctorActual.getId())) {
-            throw new RuntimeException("No tienes permisos para eliminar esta reserva");
-        }
-        
-        reservaRepository.delete(reserva);
-        return "redirect:/doctor/dashboard";
-    }
+    
 }

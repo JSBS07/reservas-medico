@@ -52,8 +52,25 @@ public class AuthController {
         if (form.getEmail() != null && !EMAIL_ALLOWED.matcher(form.getEmail()).matches()) {
             br.rejectValue("email", "email.dominio", "El correo debe ser @gmail.com o @outlook.co");
         }
-        // Unicidad
-        if (form.getEmail() != null && usuarioRepository.existsByEmail(form.getEmail())) {
+
+        // VALIDACIÓN DE LONGITUD (3-20 caracteres)
+        if (form.getEmail() != null) {
+            String localPart = form.getEmail().split("@")[0];
+            if (localPart.length() < 3 || localPart.length() > 20) {
+                br.rejectValue("email", "email.longitud", "El correo debe tener entre 3 y 20 caracteres antes del @");
+            }
+        }
+
+        // VALIDACIÓN DE REPETICIÓN (máximo 3 veces consecutivas)
+        if (form.getEmail() != null) {
+            String localPart = form.getEmail().split("@")[0].toLowerCase();
+            if (tieneMasDeTresRepeticiones(localPart)) {
+                br.rejectValue("email", "email.repetido", "No se permiten más de 3 repeticiones consecutivas del mismo carácter");
+            }
+        }
+
+        // Unicidad (normalizar a minúsculas)
+        if (form.getEmail() != null && usuarioRepository.existsByEmail(form.getEmail().toLowerCase())) {
             br.rejectValue("email", "email.existe", "Este correo ya esta registrado");
         }
         // Longitud de contraseña (max 15)
@@ -94,7 +111,8 @@ public class AuthController {
         paciente = pacienteRepository.save(paciente);
 
         Usuario user = new Usuario();
-        user.setEmail(form.getEmail());
+        // Normalizar el email a minúsculas al guardar
+        user.setEmail(form.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(form.getPassword()));
         user.setRol("PACIENTE");
         user.setActivo(true);
@@ -118,5 +136,23 @@ public class AuthController {
     @GetMapping("/")
     public String home() {
         return "index";
+    }
+
+    // comprueba si hay más de 3 repeticiones consecutivas
+    private boolean tieneMasDeTresRepeticiones(String texto) {
+        if (texto == null || texto.isEmpty()) return false;
+        
+        int contador = 1;
+        for (int i = 1; i < texto.length(); i++) {
+            if (texto.charAt(i) == texto.charAt(i - 1)) {
+                contador++;
+                if (contador > 3) {
+                    return true;
+                }
+            } else {
+                contador = 1;
+            }
+        }
+        return false;
     }
 }

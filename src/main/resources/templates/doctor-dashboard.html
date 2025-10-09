@@ -160,15 +160,7 @@
                                     <option value="COMPLETADA" th:selected="${reserva.estado == 'COMPLETADA'}">Completada</option>
                                 </select>
                             </form>
-                            <form th:action="@{/doctor/reservas/{id}/eliminar(id=${reserva.id})}" method="post" class="delete-form"
-                                  onsubmit="return confirm('Esta seguro de eliminar esta reserva?');">
-                                <input type="hidden" th:if="${_csrf != null}"
-                                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i>
-                                    Eliminar
-                                </button>
-                            </form>
+                            
                         </div>
                     </td>
                 </tr>
